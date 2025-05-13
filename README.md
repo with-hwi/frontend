@@ -37,9 +37,3 @@ npm run build
 ```sh
 npm run test:unit
 ```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
