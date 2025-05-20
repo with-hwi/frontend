@@ -10,6 +10,7 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/search">여행지 검색</RouterLink>
+        <RouterLink to="/plan">여행 계획</RouterLink>
       </nav>
     </header>
     <main>
