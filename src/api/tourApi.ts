@@ -1,4 +1,4 @@
-import { PUBLIC_DATA_API_BASE_URL } from '@/constants/urls'
+import { API_BASE_URL } from '@/constants/urls'
 import axios from './axiosInstance'
 
 const defaultParams = {
@@ -17,7 +17,7 @@ const paginationParams = ({
 })
 
 const getSido = () =>
-  axios.get(`${PUBLIC_DATA_API_BASE_URL}/areaCode1`, {
+  axios.get(`${API_BASE_URL}/api/v1/attractions/areas`, {
     params: {
       ...defaultParams,
       ...paginationParams(),
@@ -25,7 +25,7 @@ const getSido = () =>
   })
 
 const getSigungu = ({ areaCode }: { areaCode: string | number }) =>
-  axios.get(`${PUBLIC_DATA_API_BASE_URL}/areaCode1`, {
+  axios.get(`${API_BASE_URL}/api/v1/attractions/areas`, {
     params: {
       ...defaultParams,
       ...paginationParams(),
@@ -37,22 +37,24 @@ const getAttractions = ({
   sidoCode,
   sigunguCode,
   contentTypeId,
-  pageNo,
-  numOfRows,
+  page,
+  size,
+  keyword,
 }: {
   sidoCode?: string
   sigunguCode?: string
   contentTypeId?: string
-  pageNo?: number
-  numOfRows?: number
+  page?: number
+  size?: number
+  keyword?: string
 }) =>
-  axios.get(`${PUBLIC_DATA_API_BASE_URL}/areaBasedList1`, {
+  axios.get(`${API_BASE_URL}/api/v1/attractions`, {
     params: {
-      ...defaultParams,
-      ...paginationParams({ numOfRows, pageNo }),
       areaCode: sidoCode,
       sigunguCode,
-      contentTypeId,
+      page,
+      size,
+      keyword,
     },
   })
 
