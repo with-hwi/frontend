@@ -1,17 +1,17 @@
 <template>
   <div class="attraction-info-window">
     <h3>{{ attraction.title }}</h3>
-    <div v-if="attraction.firstimage" class="attraction-info-image">
-      <img :src="attraction.firstimage" :alt="attraction.title" />
+    <div v-if="attraction.firstImageUrl" class="attraction-info-image">
+      <img :src="attraction.firstImageUrl" :alt="attraction.title" />
     </div>
     <div class="attraction-info-content">
-      <p v-if="attraction.addr1" class="attraction-info-address">
+      <p v-if="attraction.address1" class="attraction-info-address">
         <span class="attraction-info-label">주소</span>
-        {{ attraction.addr1 }} {{ attraction.addr2 || '' }}
+        {{ attraction.address1 }} {{ attraction.address2 || '' }}
       </p>
-      <p v-if="attraction.tel" class="attraction-info-tel">
+      <p v-if="attraction.telephone" class="attraction-info-tel">
         <span class="attraction-info-label">연락처</span>
-        {{ attraction.tel }}
+        {{ attraction.telephone }}
       </p>
     </div>
   </div>

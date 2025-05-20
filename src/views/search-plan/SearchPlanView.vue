@@ -85,12 +85,12 @@ const fetchTourList = async () => {
     const response = await getAttractions({
       sidoCode: selectedSido.value,
       sigunguCode: selectedSigungu.value,
-      pageNo: currentPage.value,
-      numOfRows: pageSize.value,
+      page: currentPage.value,
+      size: pageSize.value,
       keyword: keyword.value,
     })
-    tourList.value = response.items
-    totalCount.value = response.totalCount
+    tourList.value = response.content
+    totalCount.value = response.totalElements
   } catch (error) {
     console.error('관광지 목록 조회 실패:', error)
     tourList.value = undefined
@@ -390,7 +390,11 @@ onUnmounted(() => {
                 :disabled="isTourLoading || tourStore.isSidoLoading"
               >
                 <option value="">시/도 선택</option>
-                <option v-for="sido in tourStore.sidoList" :key="sido.code" :value="sido.code">
+                <option
+                  v-for="sido in tourStore.sidoList"
+                  :key="sido.areaCode"
+                  :value="sido.areaCode"
+                >
                   {{ sido.name }}
                 </option>
               </select>
@@ -403,7 +407,11 @@ onUnmounted(() => {
                 :disabled="isTourLoading || tourStore.isSigunguLoading || !selectedSido"
               >
                 <option value="">시/군/구 선택</option>
-                <option v-for="sigungu in sigunguList" :key="sigungu.code" :value="sigungu.code">
+                <option
+                  v-for="sigungu in sigunguList"
+                  :key="sigungu.sigunguCode"
+                  :value="sigungu.sigunguCode"
+                >
                   {{ sigungu.name }}
                 </option>
               </select>
@@ -417,7 +425,7 @@ onUnmounted(() => {
               placeholder="검색어를 입력해주세요."
             />
             <button @click="debugSearch">test</button>
-            <button @click="handleSearch" :disabled="isTourLoading || !selectedSido">
+            <button @click="handleSearch" :disabled="isTourLoading || (!selectedSido && !keyword)">
               {{ isTourLoading ? '검색 중...' : '검색' }}
             </button>
           </div>
@@ -438,24 +446,24 @@ onUnmounted(() => {
         <ul v-else class="search-results">
           <li
             v-for="item in searchResults"
-            :key="item.contentid"
+            :key="item.contentId"
             class="result-item"
             :class="{
               'result-item-selected':
-                selectedAttraction && selectedAttraction.contentid === item.contentid,
+                selectedAttraction && selectedAttraction.contentId === item.contentId,
             }"
             @click="handleResultItemClick(item)"
             @mouseenter="handleResultItemMouseEnter(item)"
             @mouseleave="handleResultItemMouseLeave"
           >
             <div class="result-image">
-              <img v-if="item.firstimage" :src="item.firstimage" :alt="item.title" />
+              <img v-if="item.firstImageUrl" :src="item.firstImageUrl" :alt="item.title" />
               <div v-else class="no-image">이미지 없음</div>
             </div>
             <div class="result-info">
               <h3>{{ item.title }}</h3>
-              <p class="address">{{ item.addr1 }} {{ item.addr2 }}</p>
-              <p v-if="item.tel" class="tel">{{ item.tel }}</p>
+              <p class="address">{{ item.address1 }} {{ item.address2 }}</p>
+              <p v-if="item.telephone" class="tel">{{ item.telephone }}</p>
             </div>
             <button @click="handleAddAttraction(item)">추가</button>
           </li>

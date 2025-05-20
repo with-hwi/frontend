@@ -2,16 +2,17 @@ import tourApi from '@/api/tourApi'
 import type { AttractionItem, Pagination, SidoItem, SigunguItem } from '@/types/tour'
 
 const parseResponse = <T>(response: any) => {
-  return response.response.body.items.item as T[]
+  return response as T[]
 }
 
 const parsePaginatedResponse = <T>(response: any) => {
-  const body = response.response.body
+  const body = response
   return {
-    numOfRows: body.numOfRows,
-    pageNo: body.pageNo,
-    totalCount: body.totalCount,
-    items: body.items.item as T[],
+    content: body.content as T[],
+    size: body.size,
+    page: body.page,
+    totalElements: body.totalElements,
+    totalPages: body.totalPages,
   } as Pagination<T>
 }
 
@@ -29,21 +30,24 @@ const getAttractions = async ({
   sidoCode,
   sigunguCode,
   contentTypeId,
-  pageNo,
-  numOfRows,
+  page,
+  size,
+  keyword,
 }: {
   sidoCode?: string
   sigunguCode?: string
   contentTypeId?: string
-  pageNo?: number
-  numOfRows?: number
+  page?: number
+  size?: number
+  keyword?: string
 }) => {
   const response = await tourApi.getAttractions({
     sidoCode,
     sigunguCode,
-    contentTypeId,
-    pageNo,
-    numOfRows,
+    // contentTypeId, // TODO: Add back later... maybe
+    page,
+    size,
+    keyword,
   })
   return parsePaginatedResponse<AttractionItem>(response.data)
 }

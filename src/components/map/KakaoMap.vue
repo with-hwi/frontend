@@ -119,11 +119,11 @@ const displayMarkers = () => {
   // 새로운 마커 생성
   props.attractions.forEach((attraction) => {
     // 위도(latitude)와 경도(longitude) 정보가 있는지 확인
-    if (!attraction.mapy || !attraction.mapx) return
+    if (!attraction.latitude || !attraction.longitude) return
 
     const position = new window.kakao.maps.LatLng(
-      parseFloat(attraction.mapy),
-      parseFloat(attraction.mapx),
+      parseFloat(attraction.latitude),
+      parseFloat(attraction.longitude),
     )
 
     // 마커 생성
@@ -136,7 +136,7 @@ const displayMarkers = () => {
 
     // 마커에 attraction ID 저장
     // TODO: AttractionItem의 ID가 contentid 외에 다른 것으로 결정되면 수정 필요
-    marker.attractionId = attraction.contentid
+    marker.attractionId = attraction.contentId
 
     // 마커 클릭 이벤트 - 부모 컴포넌트에 정보 전달
     window.kakao.maps.event.addListener(marker, 'click', function () {
@@ -268,13 +268,13 @@ watch(
       // 여행지 정보 오버레이 닫기
       attractionInfoOverlay.value.setMap(null)
 
-      if (newAttraction && newAttraction.mapy && newAttraction.mapx) {
+      if (newAttraction && newAttraction.latitude && newAttraction.longitude) {
         // 여행지 정보 오버레이 내용 설정
         if (props.attractionInfoContent) {
           // 여행지 정보 오버레이 위치 설정
           const position = new window.kakao.maps.LatLng(
-            parseFloat(newAttraction.mapy),
-            parseFloat(newAttraction.mapx),
+            parseFloat(newAttraction.latitude),
+            parseFloat(newAttraction.longitude),
           )
 
           // 여행지 정보 오버레이 내용 설정
@@ -310,9 +310,9 @@ watch(
       }
 
       // 새로 호버된 마커가 있으면 강조 이미지로 변경
-      if (newHoveredAttraction && newHoveredAttraction.contentid) {
+      if (newHoveredAttraction && newHoveredAttraction.contentId) {
         const marker = markers.value.find(
-          (marker) => marker.attractionId === newHoveredAttraction.contentid,
+          (marker) => marker.attractionId === newHoveredAttraction.contentId,
         )
         if (marker) {
           marker.setImage(hoverMarkerImage)
