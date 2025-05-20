@@ -280,8 +280,28 @@ const handlePointMouseLeave = () => {
   hoveredPoint.value = null
 }
 
+const handlePointClick = (point: PointItem) => {
+  selectedAttraction.value = point.attraction
+
+  // 여행지 정보 콘텐츠 생성
+  const div = document.createElement('div')
+  const vnode = h(AttractionInfoWindow, { attraction: point.attraction })
+  render(vnode, div)
+  attractionInfoContent.value = div.innerHTML
+}
+
 const handleMapPointHover = (point: PointItem | null) => {
   hoveredPoint.value = point
+}
+
+const handlePointMarkerClick = (point: PointItem) => {
+  selectedAttraction.value = point.attraction
+
+  // 여행지 정보 콘텐츠 생성
+  const div = document.createElement('div')
+  const vnode = h(AttractionInfoWindow, { attraction: point.attraction })
+  render(vnode, div)
+  attractionInfoContent.value = div.innerHTML
 }
 
 //
@@ -315,6 +335,7 @@ onUnmounted(() => {
             @update-point="handleUpdatePoint"
             @mouseenter="handlePointMouseEnter"
             @mouseleave="handlePointMouseLeave"
+            @point-click="handlePointClick"
           />
         </div>
         <div
@@ -329,13 +350,14 @@ onUnmounted(() => {
         <KakaoMap
           id="map"
           :attractions="searchResults"
-          :selected-attraction="selectedAttraction"
+          :selected-attraction-or-point="selectedAttraction"
           :hovered-attraction="hoveredAttraction"
           :attraction-info-content="attractionInfoContent"
           :points="mockPointItems"
           :hovered-point="hoveredPoint"
           @marker-click="handleMarkerClick"
           @point-hover="handleMapPointHover"
+          @point-marker-click="handlePointMarkerClick"
         />
         <div class="overlay-container" :class="{ 'panel-hidden': isSearchPanelHidden }">
           <button class="toggle-panel-btn" @click="togglePanel">

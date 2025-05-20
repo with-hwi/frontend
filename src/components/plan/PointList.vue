@@ -14,6 +14,7 @@ const emit = defineEmits<{
   updatePoint: [PointItem]
   mouseenter: [PointItem]
   mouseleave: [PointItem]
+  pointClick: [PointItem]
 }>()
 
 const handleDeleteClick = (point: PointItem) => {
@@ -229,6 +230,7 @@ const isDraggable = (item: Date | PointItem): boolean => {
             @update-time="handleUpdateTime"
             @mouseenter="emit('mouseenter', $event)"
             @mouseleave="emit('mouseleave', $event)"
+            @click="emit('pointClick', item)"
             class="flex-grow"
           />
         </div>
