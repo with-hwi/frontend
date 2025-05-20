@@ -6,7 +6,10 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { h, render } from 'vue'
 import type { AttractionItem } from '@/types/tour'
+import NumberedMarker from '@/components/NumberedMarker.vue'
+import type { PointItem } from '@/types/plan'
 
 // Window with Kakao maps
 declare global {
@@ -23,6 +26,8 @@ const props = defineProps<{
   selectedAttraction?: AttractionItem | null
   hoveredAttraction?: AttractionItem | null
   attractionInfoContent?: string
+  points?: PointItem[]
+  hoveredPoint?: PointItem | null
 }>()
 
 const NORMAL_MARKER_SIZE = 36
@@ -30,11 +35,14 @@ const HOVER_MARKER_SIZE = 36
 
 const emit = defineEmits<{
   'marker-click': [attraction: AttractionItem]
+  'point-hover': [point: PointItem | null]
 }>()
 
 const mapRef = ref<HTMLElement | null>(null)
 const kakaoMap = ref<any>(null)
 const markers = ref<any[]>([])
+const numberedOverlays = ref<any[]>([])
+const polyline = ref<any>(null)
 const attractionInfoOverlay = ref<any | null>(null)
 const selectedMarker = ref<any>(undefined)
 const hoveredMarker = ref<any>(undefined)
@@ -164,6 +172,94 @@ const displayMarkers = () => {
   }
 }
 
+// 넘버링된 마커 생성 및 표시, 마커 간 선 그리기
+const displayNumberedMarkers = () => {
+  // 기존 넘버링된 마커와 선 제거
+  clearNumberedMarkersAndLine()
+
+  if (!props.points || props.points.length === 0) return
+
+  const positions: any[] = []
+
+  // 새로운 넘버링된 마커 생성
+  props.points.forEach((point, index) => {
+    if (!point.attraction.latitude || !point.attraction.longitude) return
+
+    const position = new window.kakao.maps.LatLng(
+      parseFloat(point.attraction.latitude),
+      parseFloat(point.attraction.longitude),
+    )
+    positions.push(position)
+
+    // NumberedMarker 컴포넌트를 사용하는 커스텀 오버레이 생성
+    const markerEl = document.createElement('div')
+    const vnode = h(NumberedMarker, {
+      number: index + 1,
+      highlighted: false,
+    })
+    render(vnode, markerEl)
+    const customOverlay = new window.kakao.maps.CustomOverlay({
+      map: kakaoMap.value,
+      position: position,
+      content: markerEl,
+      yAnchor: 1.0,
+      zIndex: 2,
+    })
+
+    markerEl.addEventListener('mouseover', () => {
+      // console.log('hover', point)
+      emit('point-hover', point)
+    })
+
+    markerEl.addEventListener('mouseout', () => {
+      // console.log('leave', point)
+      emit('point-hover', null)
+    })
+
+    // 배열에 추가
+    numberedOverlays.value.push({ overlay: customOverlay, container: markerEl })
+  })
+
+  console.log(positions)
+
+  // 마커들 간에 선 그리기
+  if (positions.length > 1) {
+    polyline.value = new window.kakao.maps.Polyline({
+      map: kakaoMap.value,
+      path: positions,
+      strokeWeight: 3,
+      strokeColor: '#5882FA',
+      strokeOpacity: 0.8,
+      strokeStyle: 'dashed',
+    })
+  }
+
+  // 마커가 있으면 지도 범위를 마커에 맞게 조정
+  if (positions.length > 0) {
+    const bounds = new window.kakao.maps.LatLngBounds()
+    positions.forEach((position) => {
+      bounds.extend(position)
+    })
+    kakaoMap.value.setBounds(bounds)
+  }
+}
+
+// 넘버링된 마커와 선 제거
+const clearNumberedMarkersAndLine = () => {
+  // 넘버링된 마커 제거
+  numberedOverlays.value.forEach(({ overlay, container }) => {
+    overlay.setMap(null)
+    render(null, container)
+  })
+  numberedOverlays.value = []
+
+  // 선 제거
+  if (polyline.value) {
+    polyline.value.setMap(null)
+    polyline.value = null
+  }
+}
+
 // 선택된 여행지가 변경되었을 때 여행지 정보 오버레이 표시
 watch(
   () => props.selectedAttraction,
@@ -228,6 +324,41 @@ watch(
   { deep: true },
 )
 
+// 마우스 호버된 포인트가 변경되었을 때 넘버링된 마커 강조 표시
+watch(
+  () => props.hoveredPoint,
+  (newHoveredPoint) => {
+    if (kakaoMap.value && numberedOverlays.value.length > 0) {
+      // 모든 마커를 기본 상태로 복원
+      numberedOverlays.value.forEach(({ overlay, container }, index) => {
+        const vnode = h(NumberedMarker, {
+          number: index + 1,
+          highlighted: false,
+        })
+        render(vnode, container)
+      })
+
+      // 호버된 포인트가 있으면 해당 마커를 강조
+      if (newHoveredPoint) {
+        const pointIndex = props.points?.findIndex((p) => p.pointId === newHoveredPoint.pointId)
+        if (
+          pointIndex !== undefined &&
+          pointIndex >= 0 &&
+          pointIndex < numberedOverlays.value.length
+        ) {
+          const { overlay, container } = numberedOverlays.value[pointIndex]
+          const vnode = h(NumberedMarker, {
+            number: pointIndex + 1,
+            highlighted: true,
+          })
+          render(vnode, container)
+        }
+      }
+    }
+  },
+  { deep: true },
+)
+
 // 여행지 정보 콘텐츠가 변경되었을 때 업데이트
 watch(
   () => props.attractionInfoContent,
@@ -245,6 +376,17 @@ watch(
       attractionInfoOverlay.value.setContent(content)
     }
   },
+)
+
+// points prop 변경 감지
+watch(
+  () => props.points,
+  () => {
+    if (kakaoMap.value) {
+      displayNumberedMarkers()
+    }
+  },
+  { deep: true },
 )
 
 // 모든 마커 제거
@@ -285,6 +427,7 @@ onMounted(async () => {
 
   loadMap()
   displayMarkers()
+  displayNumberedMarkers()
 })
 </script>
 
