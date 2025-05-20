@@ -8,7 +8,16 @@ import router from './router'
 
 const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
+async function prepareApp() {
+  app.use(createPinia())
+  app.use(router)
 
-app.mount('#app')
+  if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API) {
+    const { worker } = await import('./mocks/browser')
+    await worker.start()
+  }
+
+  app.mount('#app')
+}
+
+prepareApp()
