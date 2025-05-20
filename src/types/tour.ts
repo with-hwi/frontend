@@ -1,27 +1,33 @@
 export interface Pagination<T> {
-  numOfRows: number
-  pageNo: number
-  totalCount: number
-  items: T[]
+  size: number
+  page: number
+  totalElements: number
+  content: T[]
+  totalPages: number
 }
 
 export interface SidoItem {
-  code: string
+  areaCode: string
   name: string
 }
 
 export interface SigunguItem {
-  code: string
+  sigunguCode: string
   name: string
 }
 
 export interface AttractionItem {
-  contentid: string
+  contentId: string
   title: string
-  addr1?: string
-  addr2?: string
-  firstimage?: string
-  tel?: string
-  mapx?: string
-  mapy?: string
+  category1?: string
+  category2?: string
+  category3?: string
+  contentTypeId?: string
+  address1?: string
+  address2?: string
+  firstImageUrl?: string
+  firstImageThumbnailUrl?: string
+  telephone?: string
+  longitude?: string
+  latitude?: string
 }
