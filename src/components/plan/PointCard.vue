@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { PointItem } from '@/types/plan'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 interface Props {
   point: PointItem
   showDate?: boolean
+  highlighted?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -101,11 +102,20 @@ const toggleTimeEdit = () => {
     editingTime.value = true
   }
 }
+
+const cancelTimeEdit = () => {
+  // 임시 값들을 원래 값으로 초기화
+  tempStartDate.value = props.point.startDate
+  tempEndDate.value = props.point.endDate
+  dateError.value = ''
+  editingTime.value = false
+}
 </script>
 
 <template>
   <div
-    class="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition-shadow duration-300"
+    class="bg-white rounded-lg shadow-md p-4 mb-4 hover:bg-gray-50 transition-shadow duration-300"
+    :class="{ 'bg-gray-50!': highlighted }"
     @mouseenter="emit('mouseenter', point)"
     @mouseleave="emit('mouseleave', point)"
   >
@@ -156,13 +166,21 @@ const toggleTimeEdit = () => {
 
             <div class="flex items-center justify-between">
               <p v-if="dateError" class="text-red-500 text-xs">{{ dateError }}</p>
-              <button
-                @click="toggleTimeEdit"
-                class="ml-auto text-sm text-white bg-blue-500 hover:bg-blue-600 rounded px-3 py-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                :disabled="!!dateError"
-              >
-                저장
-              </button>
+              <div class="flex space-x-2 ml-auto">
+                <button
+                  @click="cancelTimeEdit"
+                  class="text-sm text-gray-600 bg-gray-200 hover:bg-gray-300 rounded px-3 py-1"
+                >
+                  취소
+                </button>
+                <button
+                  @click="toggleTimeEdit"
+                  class="text-sm text-white bg-blue-500 hover:bg-blue-600 rounded px-3 py-1 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  :disabled="!!dateError"
+                >
+                  저장
+                </button>
+              </div>
             </div>
           </div>
         </div>

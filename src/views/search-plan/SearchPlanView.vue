@@ -198,6 +198,9 @@ const searchCardTarget = computed(() => {
 
 const mockPointItems = ref(mockPoints)
 
+// 마우스 호버된 포인트 상태
+const hoveredPoint = ref<PointItem | null>(null)
+
 // TODO: API 구현되면 호출해서 변경
 const plan = reactive({
   planId: 0,
@@ -268,6 +271,19 @@ const handleUpdatePoint = (point: PointItem) => {
   })
 }
 
+// 포인트 마우스 이벤트 핸들러
+const handlePointMouseEnter = (point: PointItem) => {
+  hoveredPoint.value = point
+}
+
+const handlePointMouseLeave = () => {
+  hoveredPoint.value = null
+}
+
+const handleMapPointHover = (point: PointItem | null) => {
+  hoveredPoint.value = point
+}
+
 //
 // === 플랜 모드 관련 끝 ===
 //
@@ -294,8 +310,11 @@ onUnmounted(() => {
           <span class="text-2xl">경로 결과</span>
           <point-list
             :points="mockPointItems"
+            :hovered-point="hoveredPoint"
             @delete-point="handleDeletePoint"
             @update-point="handleUpdatePoint"
+            @mouseenter="handlePointMouseEnter"
+            @mouseleave="handlePointMouseLeave"
           />
         </div>
         <div
@@ -313,7 +332,10 @@ onUnmounted(() => {
           :selected-attraction="selectedAttraction"
           :hovered-attraction="hoveredAttraction"
           :attraction-info-content="attractionInfoContent"
+          :points="mockPointItems"
+          :hovered-point="hoveredPoint"
           @marker-click="handleMarkerClick"
+          @point-hover="handleMapPointHover"
         />
         <div class="overlay-container" :class="{ 'panel-hidden': isSearchPanelHidden }">
           <button class="toggle-panel-btn" @click="togglePanel">

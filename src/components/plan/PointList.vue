@@ -6,11 +6,14 @@ import { VueDraggable } from 'vue-draggable-plus'
 
 const props = defineProps<{
   points: PointItem[]
+  hoveredPoint: PointItem | null
 }>()
 
 const emit = defineEmits<{
   deletePoint: [PointItem]
   updatePoint: [PointItem]
+  mouseenter: [PointItem]
+  mouseleave: [PointItem]
 }>()
 
 const handleDeleteClick = (point: PointItem) => {
@@ -221,8 +224,11 @@ const isDraggable = (item: Date | PointItem): boolean => {
           </div>
           <point-card
             :point="item"
+            :highlighted="hoveredPoint?.pointId === item.pointId"
             @delete-click="handleDeleteClick"
             @update-time="handleUpdateTime"
+            @mouseenter="emit('mouseenter', $event)"
+            @mouseleave="emit('mouseleave', $event)"
             class="flex-grow"
           />
         </div>
