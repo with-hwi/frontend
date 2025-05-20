@@ -241,7 +241,7 @@ const handleAddAttraction = (attraction: AttractionItem) => {
   } else {
     startDate = new Date()
   }
-  const endDate = startDate
+  const endDate = new Date(startDate)
   endDate.setMinutes(endDate.getMinutes() + 30)
   const point = {
     pointId: Math.floor(Math.random() * 1000000),
