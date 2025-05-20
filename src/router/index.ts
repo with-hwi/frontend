@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'search',
       component: SearchPlanView,
     },
+    {
+      path: '/plan',
+      name: 'plan',
+      component: SearchPlanView,
+    },
   ],
 })
 
