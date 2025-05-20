@@ -20,7 +20,18 @@ import AttractionInfoWindow from '@/components/map/AttractionInfoWindow.vue'
 import Pagination from '@/components/Pagination.vue'
 import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
-import { ref, reactive, onMounted, onUnmounted, computed, h, render, watch, onUpdated } from 'vue'
+import {
+  ref,
+  reactive,
+  onMounted,
+  onUnmounted,
+  computed,
+  h,
+  render,
+  watch,
+  onUpdated,
+  nextTick,
+} from 'vue'
 import type { AttractionItem } from '@/types/tour'
 import { useTourStore } from '@/stores/tourStore'
 import { getAttractions } from '@/services/tourService'
@@ -76,6 +87,9 @@ const attractionInfoContent = ref<string>('')
 const sigunguList = computed(() => {
   return tourStore.getSigunguListBySido(selectedSido.value)
 })
+
+// 포인트 리스트
+const pointListRef = ref<HTMLDivElement | null>(null)
 
 // 관광지 목록 조회
 // TODO: 키워드 검색 구현
@@ -252,6 +266,14 @@ const handleAddAttraction = (attraction: AttractionItem) => {
   } as PointItem
 
   mockPointItems.value.push(point)
+
+  // 포인트 리스트 맨 밑으로 스크롤
+  nextTick(() => {
+    pointListRef.value?.scrollTo({
+      top: pointListRef.value?.scrollHeight,
+      behavior: 'smooth',
+    })
+  })
 }
 
 const handleDeletePoint = (point: PointItem) => {
@@ -326,7 +348,7 @@ onUnmounted(() => {
     <div class="plan-body-container">
       <aside v-if="mode === 'plan'" class="plan-left-panel shadow-xs">
         <span>plan side panel</span>
-        <div class="plan-left-panel-half-container">
+        <div ref="pointListRef" class="plan-left-panel-half-container">
           <span class="text-2xl">경로 결과</span>
           <point-list
             :points="mockPointItems"
@@ -487,7 +509,7 @@ onUnmounted(() => {
               <p class="address">{{ item.address1 }} {{ item.address2 }}</p>
               <p v-if="item.telephone" class="tel">{{ item.telephone }}</p>
             </div>
-            <button @click="handleAddAttraction(item)">추가</button>
+            <button @click.stop="handleAddAttraction(item)">추가</button>
           </li>
         </ul>
       </div>
