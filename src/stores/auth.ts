@@ -1,10 +1,10 @@
 import axios from '@/api/axiosInstance'
 import { API_BASE_URL } from '@/constants/urls'
 import router from '@/router'
-import type { UserState } from '@/types/auth'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 import { readonly, ref } from 'vue'
+import { useUserStore } from './userStore'
 
 // 로그인 후 redirect할 URL은 브라우저 종료 후 재접속할 때는 필요 없으므로
 // sessionStorage에 저장
@@ -17,15 +17,6 @@ const sessionStoragePersist = {
 export const useAuthStore = defineStore(
   'auth',
   () => {
-    // 사용자 정보
-    const _userState = ref<UserState | null>(null)
-
-    const userState = readonly(_userState)
-
-    const setUserState = (userState: UserState | null) => {
-      _userState.value = userState
-    }
-
     // 로그인 성공 후 redirect할 URL
     const _redirectAfterLogin = ref<string | null>(null)
 
@@ -48,7 +39,8 @@ export const useAuthStore = defineStore(
     }
 
     const logout = () => {
-      setUserState(null)
+      const userStore = useUserStore()
+      userStore.setUserInfo(null)
 
       Cookies.remove('auth_token')
       Cookies.remove('refresh_token')
@@ -57,8 +49,6 @@ export const useAuthStore = defineStore(
     }
 
     return {
-      userState,
-      setUserState,
       redirectAfterLogin,
       setRedirectAfterLogin,
       refreshAuthToken,
