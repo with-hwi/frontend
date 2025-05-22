@@ -15,8 +15,11 @@
   "dependencies": {
     "@primeuix/themes": "^1.1.1",
     "@tailwindcss/vite": "^4.1.7",
+    "@types/js-cookie": "^3.0.6",
     "axios": "^1.9.0",
+    "js-cookie": "^3.0.5",
     "pinia": "^3.0.1",
+    "pinia-plugin-persistedstate": "^4.3.0",
     "tailwindcss": "^4.1.7",
     "vue": "^3.5.13",
     "vue-draggable-plus": "^0.6.0",

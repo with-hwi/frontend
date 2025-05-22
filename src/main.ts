@@ -2,6 +2,7 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
 import App from './App.vue'
 import router from './router'
@@ -9,7 +10,10 @@ import router from './router'
 const app = createApp(App)
 
 async function prepareApp() {
-  app.use(createPinia())
+  const pinia = createPinia()
+  pinia.use(piniaPluginPersistedstate)
+  app.use(pinia)
+
   app.use(router)
 
   if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API) {
