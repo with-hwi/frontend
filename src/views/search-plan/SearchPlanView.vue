@@ -35,8 +35,24 @@ import {
 import type { AttractionItem } from '@/types/tour'
 import { useTourStore } from '@/stores/tourStore'
 import { getAttractions } from '@/services/tourService'
-import { mockAttractions, mockPoints, type PointItem } from '@/types/plan'
+import {
+  mockAttractions,
+  type ParticipantItem,
+  type PlanItem,
+  type PointItem,
+  type VisibilityType,
+} from '@/types/plan'
 import NumberedMarker from '@/components/NumberedMarker.vue'
+import {
+  addPoint,
+  deletePoint,
+  getParticipants,
+  getPlan,
+  getPoints,
+  updatePlan,
+  updatePoint,
+} from '@/services/planService'
+import { deserializeDate } from '@/utils/date'
 
 const route = useRoute()
 
@@ -201,6 +217,37 @@ const highlightResultItem = (attraction: AttractionItem) => {
 //
 
 // const searchCardTarget = ref('#search-card-desktop')
+const planId = ref<number | null>(null)
+
+watch(
+  () => route.params.planId,
+  (newPlanId) => {
+    if (newPlanId) {
+      planId.value = Number(typeof newPlanId === 'string' ? newPlanId : newPlanId[0])
+    } else {
+      planId.value = null
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  planId,
+  () => {
+    nextTick(() => {
+      if (planId.value === null || planId.value === undefined) {
+        plan.value = null
+        points.value = null
+        participants.value = null
+      } else {
+        fetchPlan()
+        fetchPoints()
+        fetchParticipants()
+      }
+    })
+  },
+  { immediate: true },
+)
 
 const searchCardTarget = computed(() => {
   if (mode.value !== 'plan') {
@@ -210,62 +257,100 @@ const searchCardTarget = computed(() => {
   return isMobile.value ? '#search-card-mobile' : '#search-card-desktop'
 })
 
-const mockPointItems = ref(mockPoints)
-
 // 마우스 호버된 포인트 상태
 const hoveredPoint = ref<PointItem | null>(null)
 
-// TODO: API 구현되면 호출해서 변경
-const plan = reactive({
-  planId: 0,
-  name: '',
-  desc: '',
-  memo: '',
-  people: 0,
-  theme: '',
-  startDate: '',
-  endDate: '',
-  attractions: [],
-})
+const plan = ref<PlanItem | null>(null)
+const points = ref<PointItem[] | null>(null)
+const participants = ref<ParticipantItem[] | null>(null)
 
-const savePlanName = (name: string) => {
-  // TODO: 구현
-  plan.name = name
-  console.log('planName', plan.name)
-}
-const savePlanDesc = (desc: string) => {
-  // TODO: 구현
-  plan.desc = desc
-  console.log('planDesc', plan.desc)
+const fetchPlan = async () => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+
+  const response = await getPlan(planId.value)
+  plan.value = response
 }
 
-const savePlanMemo = (memo: string) => {
-  // TODO: 구현
-  plan.memo = memo
-  console.log('planMemo', plan.memo)
+const _updatePlan = async (
+  params: {
+    themeId?: number
+    ownerId?: number
+    ownerNickname?: string
+    title?: string
+    description?: string
+    memo?: string
+    people?: number
+    visibility?: VisibilityType
+    startDate?: Date
+    endDate?: Date
+  } = {},
+) => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+  await updatePlan(planId.value, params)
+
+  // For now, let's just assume the updated value has been reflected server-side correctly.
+  if (plan.value) {
+    for (const key of Object.keys(params)) {
+      const typedKey = key as keyof typeof params
+      const value = params[typedKey]
+      if (value !== undefined) {
+        ;(plan.value as any)[key] = value
+      }
+    }
+  }
 }
 
-const handleAddAttraction = (attraction: AttractionItem) => {
-  // TODO: API 구현되면 호출
-  console.log('add attraction', attraction)
+const fetchPoints = async () => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+  const response = await getPoints(planId.value)
+  points.value = response
+}
+
+const fetchParticipants = async () => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+  const response = await getParticipants(planId.value)
+  participants.value = response
+}
+
+const handleAddAttraction = async (attraction: AttractionItem) => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+
   let startDate: Date
-  if (mockPointItems.value.length !== 0) {
-    startDate = new Date(mockPointItems.value[mockPointItems.value.length - 1].endDate)
+  if (points.value && points.value.length !== 0) {
+    startDate = new Date(points.value[points.value.length - 1].endDate)
     startDate.setMinutes(startDate.getMinutes() + 30)
   } else {
     startDate = new Date()
   }
   const endDate = new Date(startDate)
   endDate.setMinutes(endDate.getMinutes() + 30)
+
+  const response = await addPoint(planId.value, {
+    attractionId: attraction.attractionId,
+    from: startDate,
+    to: endDate,
+  })
+
   const point = {
-    pointId: Math.floor(Math.random() * 1000000),
-    planId: plan.planId,
-    startDate: startDate,
-    endDate: endDate,
+    pointId: response.pointId,
+    startDate: deserializeDate(response.from),
+    endDate: deserializeDate(response.to),
     attraction: attraction,
   } as PointItem
 
-  mockPointItems.value.push(point)
+  if (points.value) {
+    points.value.push(point)
+  }
 
   // 포인트 리스트 맨 밑으로 스크롤
   nextTick(() => {
@@ -276,21 +361,36 @@ const handleAddAttraction = (attraction: AttractionItem) => {
   })
 }
 
-const handleDeletePoint = (point: PointItem) => {
-  // TODO: API 구현되면 호출
+const handleDeletePoint = async (point: PointItem) => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
 
-  mockPointItems.value = mockPointItems.value.filter((p) => p.pointId !== point.pointId)
+  await deletePoint(planId.value, point.pointId)
+
+  if (points.value) {
+    points.value = points.value.filter((p) => p.pointId !== point.pointId)
+  }
 }
 
-const handleUpdatePoint = (point: PointItem) => {
-  // TODO: API 구현되면 호출
-  console.log('update point', point)
-  mockPointItems.value = mockPointItems.value.map((p) => {
-    if (p.pointId === point.pointId) {
-      return point
-    }
-    return p
+const handleUpdatePoint = async (point: PointItem) => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+
+  await updatePoint(planId.value, point.pointId, {
+    from: point.startDate,
+    to: point.endDate,
   })
+
+  if (points.value) {
+    points.value = points.value.map((p) => {
+      if (p.pointId === point.pointId) {
+        return point
+      }
+      return p
+    })
+  }
 }
 
 // 포인트 마우스 이벤트 핸들러
@@ -351,7 +451,7 @@ onUnmounted(() => {
         <div ref="pointListRef" class="plan-left-panel-half-container">
           <span class="text-2xl">경로 결과</span>
           <point-list
-            :points="mockPointItems"
+            :points="points ?? []"
             :hovered-point="hoveredPoint"
             @delete-point="handleDeletePoint"
             @update-point="handleUpdatePoint"
@@ -375,7 +475,7 @@ onUnmounted(() => {
           :selected-attraction-or-point="selectedAttraction"
           :hovered-attraction="hoveredAttraction"
           :attraction-info-content="attractionInfoContent"
-          :points="mockPointItems"
+          :points="points ?? []"
           :hovered-point="hoveredPoint"
           @marker-click="handleMarkerClick"
           @point-hover="handleMapPointHover"
@@ -398,23 +498,23 @@ onUnmounted(() => {
           <editable-label
             class="text-2xl max-w-128"
             mode="input"
-            :label="plan.name"
+            :label="plan?.title"
             placeholder="플랜 제목을 입력해주세요."
-            @save="savePlanName"
+            @save="(s) => _updatePlan({ title: s })"
           />
           <editable-label
             class="text-sm max-w-128"
             mode="input"
-            :label="plan.desc"
+            :label="plan?.description"
             placeholder="플랜 설명을 입력해주세요."
-            @save="savePlanDesc"
+            @save="(s) => _updatePlan({ description: s })"
           />
           <editable-label
-            class="text-sm max-w-128"
+            class="text-sm max-w-128 min-h-32"
             mode="textarea"
-            :label="plan.memo"
+            :label="plan?.memo"
             placeholder="플랜 메모를 입력해주세요."
-            @save="savePlanMemo"
+            @save="(s) => _updatePlan({ memo: s })"
           />
         </div>
       </aside>

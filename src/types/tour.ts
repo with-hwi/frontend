@@ -17,6 +17,7 @@ export interface SigunguItem {
 }
 
 export interface AttractionItem {
+  attractionId: number
   contentId: string
   title: string
   category1?: string

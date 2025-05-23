@@ -1,15 +1,38 @@
 import type { AttractionItem } from './tour'
 
+export interface PlanItem {
+  planId: number
+  themeId: number
+  ownerId: number
+  title: string
+  description: string
+  memo: string
+  people: number
+  createdAt: Date
+  visibility: VisibilityType
+  startDate: Date
+  endDate: Date
+}
+
+export interface ParticipantItem {
+  userId: number
+  nickname: string
+  role: 'owner' | 'member'
+}
+
 export interface PointItem {
   pointId: number
-  planId: number
   startDate: Date
   endDate: Date
   attraction: AttractionItem
 }
 
-export const mockAttractions: AttractionItem[] = [
+export type VisibilityType = 'public' | 'private'
+
+let attractionId = 0
+export const mockAttractions = [
   {
+    attractionId: attractionId++,
     address1: '서울특별시 강남구 언주로 608',
     address2: '',
     category1: 'A05',
@@ -25,6 +48,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가나돈까스의집',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 종로구 평창30길 28',
     address2: '(평창동)',
     category1: 'A02',
@@ -40,6 +64,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가나아트센터',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 강남구 도산대로 113(신사동)',
     address2: '',
     category1: 'A04',
@@ -55,6 +80,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가나안약국',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 중구 남대문로 81',
     address2: '',
     category1: 'A04',
@@ -70,6 +96,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가네시 롯데본점',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 금천구 디지털로 185 (가산동)',
     address2: '',
     category1: 'A04',
@@ -85,6 +112,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가넷옴므',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 강남구 언주로167길 35',
     address2: '',
     category1: 'A05',
@@ -100,6 +128,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가담',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 송파구 충민로 66',
     address2: '',
     category1: 'A04',
@@ -115,6 +144,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가든파이브라이프(Garden5life)',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 송파구 송이로19길 3',
     address2: '(가락동)',
     category1: 'A05',
@@ -130,6 +160,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가락골마산아구찜',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 송파구 송파대로28길 5',
     address2: '(가락동)',
     category1: 'B02',
@@ -145,6 +176,7 @@ export const mockAttractions: AttractionItem[] = [
     title: '가락관광호텔',
   },
   {
+    attractionId: attractionId++,
     address1: '서울특별시 송파구 양재대로 932',
     address2: '(가락동)',
     category1: 'A04',
@@ -159,50 +191,4 @@ export const mockAttractions: AttractionItem[] = [
     telephone: '02-3435-1000',
     title: '가락농수산물종합도매시장',
   },
-]
-
-let i = 0
-export const mockPoints: PointItem[] = [
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 10, 16, 0),
-    endDate: new Date(2025, 5, 10, 16, 10),
-    attraction: mockAttractions[0],
-  },
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 10, 16, 30),
-    endDate: new Date(2025, 5, 10, 16, 40),
-    attraction: mockAttractions[1],
-  },
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 10, 17, 0),
-    endDate: new Date(2025, 5, 10, 17, 10),
-    attraction: mockAttractions[2],
-  },
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 11, 17, 30),
-    endDate: new Date(2025, 5, 11, 17, 40),
-    attraction: mockAttractions[3],
-  },
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 12, 18, 0),
-    endDate: new Date(2025, 5, 12, 18, 10),
-    attraction: mockAttractions[4],
-  },
-  {
-    pointId: i++,
-    planId: 1,
-    startDate: new Date(2025, 5, 12, 18, 30),
-    endDate: new Date(2025, 5, 12, 18, 40),
-    attraction: mockAttractions[5],
-  },
-]
+] as AttractionItem[]

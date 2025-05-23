@@ -25,7 +25,7 @@ const router = createRouter({
       component: SearchPlanView,
     },
     {
-      path: '/plan',
+      path: '/plan/:planId',
       name: 'plan',
       component: SearchPlanView,
     },
