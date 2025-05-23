@@ -6,10 +6,12 @@ interface Props {
   point: PointItem
   showDate?: boolean
   highlighted?: boolean
+  editable?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showDate: false,
+  editable: false,
 })
 
 const emit = defineEmits<{
@@ -93,6 +95,10 @@ const formatDateTimeForInput = (date: Date) => {
 }
 
 const toggleTimeEdit = () => {
+  if (!props.editable) {
+    return
+  }
+
   if (editingTime.value) {
     if (!dateError.value) {
       emit('update-time', props.point, tempStartDate.value, tempEndDate.value)
@@ -187,6 +193,7 @@ const cancelTimeEdit = () => {
       </div>
 
       <button
+        v-if="editable"
         @click="emit('delete-click', point)"
         class="absolute top-0 right-0 text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors duration-200"
       >

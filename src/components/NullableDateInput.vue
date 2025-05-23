@@ -21,6 +21,7 @@
       @blur="handleBlur"
       class="flex-grow-1 px-3 py-2 border border-gray-300 rounded-md text-sm transition-colors duration-200 focus:outline-none focus:border-blue-500 focus:ring-3 focus:ring-blue-100"
       ref="dateInputRef"
+      :disabled="props.disabled"
     />
   </div>
 </template>
@@ -34,6 +35,7 @@ interface Props {
   defaultDateGenerator?: () => Date
   minDate?: Date
   maxDate?: Date
+  disabled?: boolean
 }
 
 interface Emits {
@@ -49,6 +51,10 @@ const dateInputRef = ref<HTMLInputElement>()
 
 // 라벨 클릭 시 기본 날짜 생성 및 input으로 전환
 const handleLabelClick = async () => {
+  if (props.disabled) {
+    return
+  }
+
   const defaultDate = props.defaultDateGenerator()
   emit('update:modelValue', defaultDate)
 
@@ -59,6 +65,10 @@ const handleLabelClick = async () => {
 
 // 날짜 변경 처리
 const handleDateChange = (event: Event) => {
+  if (props.disabled) {
+    return
+  }
+
   const target = event.target as HTMLInputElement
   const dateValue = target.value
   if (dateValue) {
@@ -71,6 +81,10 @@ const handleDateChange = (event: Event) => {
 
 // input에서 포커스가 벗어날 때 빈 값이면 null로 설정
 const handleBlur = (event: Event) => {
+  if (props.disabled) {
+    return
+  }
+
   const target = event.target as HTMLInputElement
   if (!target.value) {
     emit('update:modelValue', undefined)

@@ -77,7 +77,7 @@ const updateParticipant = (planId: number, userId: number, data: UpdateParticipa
 const deleteParticipant = (planId: number, userId: number) =>
   axios.delete(`${API_BASE_URL}/api/v1/plans/${planId}/participants/${userId}`)
 
-const updatePlanNickname = (planId: number, userId: number, data: PlanNicknameReqDto) =>
+const updateNickname = (planId: number, userId: number, data: PlanNicknameReqDto) =>
   axios.put<PlanNicknameResDto>(`${API_BASE_URL}/api/v1/plans/${planId}/nickname/${userId}`, {
     ...data,
   })
@@ -94,5 +94,5 @@ export default {
   addPoint,
   updatePoint,
   deletePoint,
-  updatePlanNickname,
+  updateNickname,
 }

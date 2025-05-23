@@ -127,7 +127,11 @@ export const updatePoint = (
 
 export const deletePoint = (planId: number, pointId: number) => planApi.deletePoint(planId, pointId)
 
-export const updatePlanNickname = (planId: number, userId: number, nickname: string) =>
+export const updateNickname = (
+  planId: number,
+  userId: number,
+  { nickname }: { nickname: string },
+) =>
   planApi
-    .updatePlanNickname(planId, userId, { nickname } as PlanNicknameReqDto)
+    .updateNickname(planId, userId, { nickname } as PlanNicknameReqDto)
     .then((response) => response.data)
