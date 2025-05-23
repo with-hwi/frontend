@@ -13,3 +13,12 @@ export const serializeDate = (date: Date) => {
 }
 
 export const deserializeDate = (dateString: string) => new Date(dateString)
+
+// Get date only from date type, independent of timezone
+export const getDateOnly = (date: Date) => {
+  const year = date.getUTCFullYear()
+  const month = date.getUTCMonth()
+  const day = date.getUTCDate()
+
+  return new Date(Date.UTC(year, month, day))
+}

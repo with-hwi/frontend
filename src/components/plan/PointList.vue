@@ -69,8 +69,6 @@ const getDateOnly = (date: Date): Date => {
 
 // })
 const pointListItems = computed(() => {
-  console.log('com')
-
   const result: (Date | PointItem)[] = []
 
   let prevDate: Date | undefined

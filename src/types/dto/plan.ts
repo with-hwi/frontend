@@ -3,16 +3,16 @@ import type { AttractionItem } from '../tour'
 
 export interface GetPlanResDto {
   planId: number
-  themeId?: number
-  ownerId?: number
-  title?: string
-  description?: string
-  memo?: string
-  people?: number
-  createdAt?: string
-  visibility?: VisibilityType
-  startDate?: string
-  endDate?: string
+  themeId: number
+  ownerId: number
+  title: string
+  description: string
+  memo: string
+  people: number
+  createdAt: string
+  visibility: VisibilityType
+  startDate: string
+  endDate: string
 }
 
 export interface CreatePlanReqDto {
@@ -103,32 +103,3 @@ export interface PlanNicknameResDto {
   userId: number
   nickname: string
 }
-
-/*
-{
-”planId”:123,
-”themeId”: “123”,
-”ownerId”: 123,
-”ownerNickname”: “ssafy”,
-”title”: “서울여행”,
-”description”: “서울 여행입니다”,
-”memo”: “메모입니다”,
-”people”: 10,
-”createdAt”: “날짜”,
-”startDate”: “출발 날짜”,
-”endDate”: “끝나는 날짜”,
-”visibility”: “public | private”
-”participants”: [
-  {
-  “userId”: 123,
-  “nickname”: “행복한 라이언”,
-  “role”: “owner | member”,
-  },
-  // ….
-],
-”points”: [
-  // 여행지 검색 결과 DTO와 동일하되, order 도 함께.
-]
-}
-
-*/

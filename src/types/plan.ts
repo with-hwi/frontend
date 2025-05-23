@@ -27,7 +27,7 @@ export interface PointItem {
   attraction: AttractionItem
 }
 
-export type VisibilityType = 'public' | 'private'
+export type VisibilityType = 'hidden' | 'open'
 
 let attractionId = 0
 export const mockAttractions = [

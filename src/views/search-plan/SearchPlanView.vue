@@ -52,7 +52,10 @@ import {
   updatePlan,
   updatePoint,
 } from '@/services/planService'
-import { deserializeDate } from '@/utils/date'
+import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
+import { throttle } from 'throttle-debounce'
+import { planThemes } from '@/constants/plan_themes'
+import NullableDateInput from '@/components/NullableDateInput.vue'
 
 const route = useRoute()
 
@@ -264,6 +267,20 @@ const plan = ref<PlanItem | null>(null)
 const points = ref<PointItem[] | null>(null)
 const participants = ref<ParticipantItem[] | null>(null)
 
+// 인원 수 변동은 디바운스되어 서버에 즉시 반영되지 않으므로,
+// 임시로 값을 저장해놓고 나중에 한 번에 업데이트함
+const cachedPeople = ref<number>(1)
+
+// 테마 ID를 위한 computed 속성 - undefined를 null로 변환
+const selectedThemeId = computed({
+  get: () => plan.value?.themeId ?? null,
+  set: (value) => {
+    if (plan.value) {
+      _updatePlan({ themeId: value === null ? undefined : value })
+    }
+  },
+})
+
 const fetchPlan = async () => {
   if (planId.value === null || planId.value === undefined) {
     return
@@ -271,6 +288,8 @@ const fetchPlan = async () => {
 
   const response = await getPlan(planId.value)
   plan.value = response
+
+  cachedPeople.value = response.people || 1
 }
 
 const _updatePlan = async (
@@ -297,11 +316,45 @@ const _updatePlan = async (
     for (const key of Object.keys(params)) {
       const typedKey = key as keyof typeof params
       const value = params[typedKey]
-      if (value !== undefined) {
-        ;(plan.value as any)[key] = value
-      }
+      ;(plan.value as any)[key] = value
     }
   }
+}
+
+const throttledUpdatePeople = throttle(500, () => {
+  _updatePlan({ people: cachedPeople.value })
+})
+
+const incrementPeople = () => {
+  cachedPeople.value++
+  throttledUpdatePeople()
+}
+
+const decrementPeople = () => {
+  cachedPeople.value--
+  _updatePlan({ people: cachedPeople.value })
+}
+
+const getDefaultStartDate = () => {
+  const today = getDateOnly(new Date())
+  if (plan.value?.endDate) {
+    const endDate = getDateOnly(new Date(plan.value.endDate))
+    if (today <= endDate) {
+      const startDate = new Date(endDate)
+      startDate.setDate(startDate.getDate() - 1)
+      return startDate
+    }
+  }
+  return today
+}
+
+const getDefaultEndDate = () => {
+  if (plan.value?.startDate) {
+    const endDate = new Date(plan.value.startDate)
+    endDate.setDate(endDate.getDate() + 1)
+    return endDate
+  }
+  return getDateOnly(new Date())
 }
 
 const fetchPoints = async () => {
@@ -494,28 +547,84 @@ onUnmounted(() => {
         </div>
       </div>
       <aside v-if="mode === 'plan'" class="plan-right-panel shadow-xs">
-        <div class="flex flex-col m-8">
-          <editable-label
-            class="text-2xl max-w-128"
-            mode="input"
-            :label="plan?.title"
-            placeholder="플랜 제목을 입력해주세요."
-            @save="(s) => _updatePlan({ title: s })"
-          />
-          <editable-label
-            class="text-sm max-w-128"
-            mode="input"
-            :label="plan?.description"
-            placeholder="플랜 설명을 입력해주세요."
-            @save="(s) => _updatePlan({ description: s })"
-          />
-          <editable-label
-            class="text-sm max-w-128 min-h-32"
-            mode="textarea"
-            :label="plan?.memo"
-            placeholder="플랜 메모를 입력해주세요."
-            @save="(s) => _updatePlan({ memo: s })"
-          />
+        <div v-if="plan" class="contents">
+          <div class="flex flex-col m-8">
+            <editable-label
+              class="text-2xl max-w-128"
+              mode="input"
+              :label="plan?.title"
+              placeholder="플랜 제목을 입력해주세요."
+              @save="(s) => _updatePlan({ title: s })"
+            />
+            <editable-label
+              class="text-sm max-w-128"
+              mode="input"
+              :label="plan?.description"
+              placeholder="플랜 설명을 입력해주세요."
+              @save="(s) => _updatePlan({ description: s })"
+            />
+            <editable-label
+              class="text-sm max-w-128 min-h-32"
+              mode="textarea"
+              :label="plan?.memo"
+              placeholder="플랜 메모를 입력해주세요."
+              @save="(s) => _updatePlan({ memo: s })"
+            />
+          </div>
+          <div class="flex flex-col m-8 mt-16">
+            <!-- 인원수 카운터 -->
+            <label class="block text-sm font-medium text-gray-700 mb-2">인원수</label>
+            <div class="flex items-center space-x-3">
+              <button
+                @click="decrementPeople"
+                class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                -
+              </button>
+              <span class="min-w-[3rem] text-center text-lg font-medium">{{ cachedPeople }}</span>
+              <button
+                @click="incrementPeople"
+                class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                +
+              </button>
+            </div>
+            <div class="flex items-center space-x-3">
+              <label for="theme">테마</label>
+              <select id="theme" v-model="selectedThemeId">
+                <option
+                  v-for="theme in planThemes"
+                  :key="theme.themeId"
+                  :value="theme.themeId"
+                  :selected="plan.themeId === theme.themeId"
+                >
+                  {{ theme.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- 여행 날짜 선택 -->
+            <div class="flex flex-col space-y-3 mt-4">
+              <div class="flex flex-col space-y-2">
+                <nullable-date-input
+                  label="시작 날짜를 지정해주세요."
+                  :model-value="plan.startDate"
+                  :max-date="plan.endDate"
+                  @update:model-value="(date) => _updatePlan({ startDate: date })"
+                  :default-date-generator="getDefaultStartDate"
+                />
+              </div>
+              <div class="flex flex-col space-y-2">
+                <nullable-date-input
+                  label="종료 날짜를 지정해주세요."
+                  :model-value="plan.endDate"
+                  :min-date="plan.startDate"
+                  @update:model-value="(date) => _updatePlan({ endDate: date })"
+                  :default-date-generator="getDefaultEndDate"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
