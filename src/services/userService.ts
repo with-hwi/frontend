@@ -7,7 +7,7 @@ const getUserInfo = async () => {
   const response = await userApi.getUserInfo()
   return {
     userId: response.data.userId,
-    username: response.data.username,
+    nickname: response.data.nickname,
   } as UserInfo
 }
 
