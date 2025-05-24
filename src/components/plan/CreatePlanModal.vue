@@ -128,7 +128,7 @@ const handleSubmit = async () => {
     const planId = response.data.planId
 
     // 생성된 플랜 페이지로 이동
-    await router.push(`/plan/${planId}`)
+    await router.push(`/plan/${planId}?newPlan=true`)
 
     // 모달 닫기
     emit('close')

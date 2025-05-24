@@ -14,13 +14,14 @@ mode 설정 여부에 따라 검색 모드 혹은 플랜 모드로 동작.
 -->
 
 <script setup lang="ts">
-import { useRoute, type RouteRecordNameGeneric } from 'vue-router'
+import { useRoute, useRouter, type RouteRecordNameGeneric } from 'vue-router'
 import KakaoMap from '@/components/map/KakaoMap.vue'
 import AttractionInfoWindow from '@/components/map/AttractionInfoWindow.vue'
 import Pagination from '@/components/Pagination.vue'
 import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
 import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
+import PlanWizardModal from '@/components/plan/PlanWizardModal.vue'
 import {
   ref,
   reactive,
@@ -62,6 +63,7 @@ import { planThemes } from '@/constants/plan_themes'
 import NullableDateInput from '@/components/NullableDateInput.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 // 모드
 // TODO: Maybe find a better way to handle mode detection.
@@ -279,6 +281,48 @@ const cachedPeople = ref<number>(1)
 // 사용자 정보에서 userId를 받아올 수 있게 되면 추후 수정
 const tempUserId = ref(3)
 
+// 마법사 모달 관련
+const showWizardModal = ref(false)
+const WIZARD_STORAGE_KEY = 'plan-wizard-never-show'
+
+// 마법사 모달을 표시할지 확인
+const shouldShowWizard = () => {
+  // 새로 생성된 플랜인지 확인 (쿼리 파라미터)
+  const isNewPlan = route.query.newPlan === 'true'
+
+  // 새로 생성된 플랜이 아니면 마법사 표시하지 않음
+  if (!isNewPlan) {
+    return false
+  }
+
+  // '다시 보지 않기'를 선택했는지 확인
+  const neverShow = localStorage.getItem(WIZARD_STORAGE_KEY)
+  if (neverShow === 'true') {
+    return false
+  }
+
+  // 플랜이 있으면 마법사 표시
+  return plan.value !== null
+}
+
+// 마법사 완료 처리
+const handleWizardComplete = async (data: {
+  description: string
+  people: number
+  themeId: number
+}) => {
+  await _updatePlan({
+    description: data.description,
+    people: data.people,
+    themeId: data.themeId,
+  })
+}
+
+// 다시 보지 않기 처리
+const handleWizardNeverShow = () => {
+  localStorage.setItem(WIZARD_STORAGE_KEY, 'true')
+}
+
 // 테마 ID를 위한 computed 속성 - undefined를 null로 변환
 const selectedThemeId = computed({
   get: () => plan.value?.themeId ?? null,
@@ -298,6 +342,18 @@ const fetchPlan = async () => {
   plan.value = response
 
   cachedPeople.value = response.people || 1
+
+  // 플랜 로드 후 마법사 표시 확인
+  nextTick(() => {
+    if (shouldShowWizard()) {
+      showWizardModal.value = true
+
+      // 쿼리 파라미터에서 newPlan 제거
+      const currentQuery = { ...route.query }
+      delete currentQuery.newPlan
+      router.replace({ query: currentQuery })
+    }
+  })
 }
 
 const _updatePlan = async (
@@ -712,6 +768,15 @@ onUnmounted(() => {
               placeholder="플랜 메모를 입력해주세요."
               @save="(s) => _updatePlan({ memo: s })"
             />
+
+            <!-- 마법사 재실행 버튼 -->
+            <button
+              v-if="isCurrentUserHost"
+              @click="showWizardModal = true"
+              class="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors self-start"
+            >
+              플랜 설정 마법사 실행
+            </button>
           </div>
           <div class="flex flex-col m-8 mt-16">
             <!-- 인원수 카운터 -->
@@ -1056,6 +1121,16 @@ onUnmounted(() => {
       />
     </div>
   </Teleport>
+
+  <!-- 플랜 마법사 모달 -->
+  <PlanWizardModal
+    v-model="showWizardModal"
+    :initial-description="plan?.description"
+    :initial-people="plan?.people"
+    :initial-theme-id="plan?.themeId"
+    @complete="handleWizardComplete"
+    @never-show-again="handleWizardNeverShow"
+  />
 </template>
 
 <style>
