@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SearchPlanView from '@/views/search-plan/SearchPlanView.vue'
 import { useAuthStore } from '@/stores/auth'
-import { retrieveUserInfoIfHasAccessToken } from '@/services/userService'
+import { retrieveUserInfoIfPossible } from '@/services/userService'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -34,7 +34,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   // 페이지 이동 사이에 액세스 토큰이 갱신되면 사용자 정보 받아오기
-  await retrieveUserInfoIfHasAccessToken()
+  await retrieveUserInfoIfPossible()
 
   if (to.path === '/') {
     // 로그인 후 이 페이지로 리다이렉트되면 기존 페이지로 리다이렉트 처리

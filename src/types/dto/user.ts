@@ -1,3 +1,4 @@
 export interface UserInfoDto {
-  username: string
+  userId: number
+  nickname: string
 }

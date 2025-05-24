@@ -6,19 +6,25 @@ import { useUserStore } from '@/stores/userStore'
 const getUserInfo = async () => {
   const response = await userApi.getUserInfo()
   return {
-    username: response.data.username,
+    userId: response.data.userId,
+    nickname: response.data.nickname,
   } as UserInfo
 }
 
-const retrieveUserInfoIfHasAccessToken = async () => {
+// 액세스 토큰이 있는데 사용자 정보가 없으면 사용자 정보를 가져옴
+const retrieveUserInfoIfPossible = async () => {
   const accessToken = getAccessToken()
   if (!accessToken) {
     return null
   }
 
-  const userInfo = await getUserInfo()
   const userStore = useUserStore()
+  if (userStore.userInfo) {
+    return
+  }
+
+  const userInfo = await getUserInfo()
   userStore.setUserInfo(userInfo)
 }
 
-export { getUserInfo, retrieveUserInfoIfHasAccessToken }
+export { getUserInfo, retrieveUserInfoIfPossible }
