@@ -20,8 +20,6 @@ import AttractionInfoWindow from '@/components/map/AttractionInfoWindow.vue'
 import Pagination from '@/components/Pagination.vue'
 import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
-import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
-import PlanWizardModal from '@/components/plan/PlanWizardModal.vue'
 import {
   ref,
   reactive,
@@ -257,6 +255,8 @@ watch(
   },
   { immediate: true },
 )
+
+const canSearchCardTeleport = ref(false)
 
 const searchCardTarget = computed(() => {
   if (mode.value !== 'plan') {
@@ -683,6 +683,11 @@ onMounted(() => {
 
   updateMobileMode()
   window.addEventListener('resize', updateMobileMode)
+
+  // DOM이 준비된 후에 teleport 가능하도록 설정
+  nextTick(() => {
+    canSearchCardTeleport.value = true
+  })
 })
 
 onUnmounted(() => {
@@ -1012,7 +1017,7 @@ onUnmounted(() => {
       </aside>
     </div>
   </div>
-  <Teleport :to="searchCardTarget">
+  <Teleport v-if="canSearchCardTeleport" :to="searchCardTarget">
     <div class="contents">
       <div class="tour-search">
         <div class="search-form">
