@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/userStore'
 const getUserInfo = async () => {
   const response = await userApi.getUserInfo()
   return {
+    userId: response.data.userId,
     username: response.data.username,
   } as UserInfo
 }
