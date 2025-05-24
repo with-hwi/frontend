@@ -17,6 +17,9 @@ export interface GetPlanResDto {
 
 export interface CreatePlanReqDto {
   title: string
+  startDate: string
+  endDate: string
+  themeId: number
 }
 
 export interface CreatePlanResDto {

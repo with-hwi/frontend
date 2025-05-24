@@ -9,7 +9,7 @@ import type {
   UpdatePointReqDto,
 } from '@/types/dto/plan'
 import type { ParticipantItem, PlanItem, PointItem, VisibilityType } from '@/types/plan'
-import { deserializeDate, serializeDate } from '@/utils/date'
+import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
 
 export const getPlan = async (planId: number) => {
   const response = await planApi.getPlan(planId)
@@ -29,7 +29,13 @@ export const getPlan = async (planId: number) => {
   } as PlanItem
 }
 
-export const createPlan = (title: string) => planApi.createPlan({ title } as CreatePlanReqDto)
+export const createPlan = (title: string, startDate: Date, endDate: Date) =>
+  planApi.createPlan({
+    title,
+    startDate: serializeDate(startDate),
+    endDate: serializeDate(endDate),
+    themeId: 0,
+  })
 
 export const updatePlan = (
   planId: number,
