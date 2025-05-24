@@ -1138,7 +1138,7 @@ onUnmounted(() => {
   />
 </template>
 
-<style>
+<style scoped>
 :root {
   --left-side-panel-width: 400px;
   --right-side-panel-width: 400px;
