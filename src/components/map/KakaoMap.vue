@@ -23,7 +23,7 @@ declare global {
 
 const props = defineProps<{
   attractions?: AttractionItem[]
-  selectedAttraction?: AttractionItem | null
+  selectedAttractionOrPoint?: AttractionItem | PointItem | null
   hoveredAttraction?: AttractionItem | null
   attractionInfoContent?: string
   points?: PointItem[]
@@ -36,6 +36,7 @@ const HOVER_MARKER_SIZE = 36
 const emit = defineEmits<{
   'marker-click': [attraction: AttractionItem]
   'point-hover': [point: PointItem | null]
+  'point-marker-click': [point: PointItem]
 }>()
 
 const mapRef = ref<HTMLElement | null>(null)
@@ -206,6 +207,10 @@ const displayNumberedMarkers = () => {
       zIndex: 2,
     })
 
+    markerEl.addEventListener('click', () => {
+      emit('point-marker-click', point)
+    })
+
     markerEl.addEventListener('mouseover', () => {
       // console.log('hover', point)
       emit('point-hover', point)
@@ -262,19 +267,27 @@ const clearNumberedMarkersAndLine = () => {
 
 // 선택된 여행지가 변경되었을 때 여행지 정보 오버레이 표시
 watch(
-  () => props.selectedAttraction,
+  () => props.selectedAttractionOrPoint,
   (newAttraction) => {
     if (kakaoMap.value && attractionInfoOverlay.value) {
       // 여행지 정보 오버레이 닫기
       attractionInfoOverlay.value.setMap(null)
 
-      if (newAttraction && newAttraction.latitude && newAttraction.longitude) {
+      if (!newAttraction) {
+        return
+      }
+
+      const attraction = newAttraction.hasOwnProperty('attractionId')
+        ? (newAttraction as AttractionItem)
+        : ((newAttraction as PointItem).attraction as AttractionItem)
+
+      if (attraction && attraction.latitude && attraction.longitude) {
         // 여행지 정보 오버레이 내용 설정
         if (props.attractionInfoContent) {
           // 여행지 정보 오버레이 위치 설정
           const position = new window.kakao.maps.LatLng(
-            parseFloat(newAttraction.latitude),
-            parseFloat(newAttraction.longitude),
+            parseFloat(attraction.latitude),
+            parseFloat(attraction.longitude),
           )
 
           // 여행지 정보 오버레이 내용 설정
@@ -363,7 +376,7 @@ watch(
 watch(
   () => props.attractionInfoContent,
   (newContent) => {
-    if (attractionInfoOverlay.value && newContent && props.selectedAttraction) {
+    if (attractionInfoOverlay.value && newContent && props.selectedAttractionOrPoint) {
       const content = `
         <div class="attraction-info-overlay">
           <div class="attraction-info-overlay-content">

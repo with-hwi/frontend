@@ -7,6 +7,7 @@ import { VueDraggable } from 'vue-draggable-plus'
 const props = defineProps<{
   points: PointItem[]
   hoveredPoint: PointItem | null
+  editable?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -14,6 +15,7 @@ const emit = defineEmits<{
   updatePoint: [PointItem]
   mouseenter: [PointItem]
   mouseleave: [PointItem]
+  pointClick: [PointItem]
 }>()
 
 const handleDeleteClick = (point: PointItem) => {
@@ -68,8 +70,6 @@ const getDateOnly = (date: Date): Date => {
 
 // })
 const pointListItems = computed(() => {
-  console.log('com')
-
   const result: (Date | PointItem)[] = []
 
   let prevDate: Date | undefined
@@ -209,7 +209,10 @@ const isDraggable = (item: Date | PointItem): boolean => {
 
         <!-- 해당 날짜의 포인트 목록 -->
         <div v-else-if="typeof item === 'object' && 'pointId' in item" class="flex items-center">
-          <div class="drag-handle p-1 mr-2 text-gray-500 cursor-move" v-if="isDraggable(item)">
+          <div
+            v-if="isDraggable(item) && editable"
+            class="drag-handle p-1 mr-2 text-gray-500 cursor-move"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -225,10 +228,12 @@ const isDraggable = (item: Date | PointItem): boolean => {
           <point-card
             :point="item"
             :highlighted="hoveredPoint?.pointId === item.pointId"
+            :editable="editable"
             @delete-click="handleDeleteClick"
             @update-time="handleUpdateTime"
             @mouseenter="emit('mouseenter', $event)"
             @mouseleave="emit('mouseleave', $event)"
+            @click="emit('pointClick', item)"
             class="flex-grow"
           />
         </div>

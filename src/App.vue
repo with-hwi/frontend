@@ -1,8 +1,27 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import { onMounted } from 'vue'
-import { retrieveUserInfoIfPossible } from './services/userService'
+import CreatePlanModal from './components/plan/CreatePlanModal.vue'
+import { ref } from 'vue'
+
+//
+// === 플랜 생성 관련 시작 ===
+//
+
+// 모달 상태 관리
+const isCreatePlanModalVisible = ref(false)
+
+const openCreatePlanModal = () => {
+  isCreatePlanModalVisible.value = true
+}
+
+const closeCreatePlanModal = () => {
+  isCreatePlanModalVisible.value = false
+}
+
+//
+// === 플랜 생성 관련 끝 ===
+//
 </script>
 
 <template>
@@ -12,12 +31,16 @@ import { retrieveUserInfoIfPossible } from './services/userService'
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
         <RouterLink to="/search">여행지 검색</RouterLink>
-        <RouterLink to="/plan">여행 계획</RouterLink>
+        <RouterLink to="/plan/0">여행 계획</RouterLink>
+        <a @click="openCreatePlanModal" class="cursor-pointer">계획 생성</a>
       </nav>
     </header>
     <main>
       <RouterView />
     </main>
+
+    <!-- 플랜 생성 모달 -->
+    <CreatePlanModal :is-visible="isCreatePlanModalVisible" @close="closeCreatePlanModal" />
   </div>
 </template>
 

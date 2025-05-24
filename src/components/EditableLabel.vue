@@ -5,6 +5,7 @@ const props = defineProps<{
   label?: string
   placeholder?: string
   mode?: 'input' | 'textarea'
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -21,6 +22,10 @@ watch(
 )
 
 const handleEditClick = () => {
+  if (props.disabled) {
+    return
+  }
+
   if (!isEditing.value) {
     isEditing.value = true
     setTimeout(() => {
@@ -65,7 +70,8 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
     <div class="editable-label-input-container flex flex-grow-1 relative">
       <input
         v-if="mode === 'input'"
-        class="min-w-8 flex-grow-1 overflow-hidden text-ellipsis transition-all hover:bg-gray-200 rounded-sm"
+        class="min-w-8 flex-grow-1 overflow-hidden text-ellipsis transition-all rounded-sm"
+        :class="{ 'hover:bg-gray-200': !props.disabled }"
         type="text"
         ref="inputRef"
         @click="handleEditClick"
@@ -73,16 +79,19 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
         @blur="cancelEdit"
         :placeholder="placeholder"
         v-model="editableLabel"
+        :disabled="disabled"
         :readonly="!isEditing"
       />
       <textarea
         v-else
-        class="min-w-8 flex-grow-1 overflow-hidden text-ellipsis transition-all hover:bg-gray-200 rounded-sm"
+        class="min-w-8 flex-grow-1 overflow-hidden text-ellipsis transition-all rounded-sm"
+        :class="{ 'hover:bg-gray-200': !props.disabled }"
         ref="inputRef"
         @click="handleEditClick"
         @keyup="handleTextareaKeyup"
         :placeholder="placeholder"
         v-model="editableLabel"
+        :disabled="disabled"
         :readonly="!isEditing"
       />
 
