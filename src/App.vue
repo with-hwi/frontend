@@ -2,12 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import { onMounted } from 'vue'
-import { retrieveUserInfoIfHasAccessToken } from './services/userService'
-
-onMounted(() => {
-  // 액세스 토큰이 있는 상태에서 최초 접속 시 사용자 정보 가져오기
-  retrieveUserInfoIfHasAccessToken()
-})
+import { retrieveUserInfoIfPossible } from './services/userService'
 </script>
 
 <template>
