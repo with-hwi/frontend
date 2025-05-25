@@ -4,7 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import PrimeVue from 'primevue/config'
-import Aura from '@primeuix/themes/aura'
+import TrabuddyPreset from './theme/trabuddy-preset'
 
 import App from './App.vue'
 import router from './router'
@@ -27,7 +27,7 @@ async function prepareApp() {
 
   app.use(PrimeVue, {
     theme: {
-      preset: Aura,
+      preset: TrabuddyPreset,
     },
   })
 
