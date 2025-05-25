@@ -62,7 +62,7 @@ onUnmounted(() => {
     style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
   >
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex relative justify-between items-center h-16">
+      <div class="flex relative justify-between items-center nav-height">
         <!-- 서비스 로고 -->
         <div class="flex items-center">
           <RouterLink

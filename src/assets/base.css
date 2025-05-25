@@ -46,6 +46,10 @@
  */
 
 @theme {
+  /* 네비게이션 바 높이 변수 */
+  --nav-height: 4rem; /* 64px (h-16 대응) */
+
+  /* 컬러 변수들 */
   --color-primary-50: #f8f8f0;
   --color-primary-100: #f0f0e0;
   --color-primary-200: #e6e6cc;
@@ -89,6 +93,27 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
+}
+
+/* 네비게이션 바 높이 유틸리티 클래스 */
+.nav-height {
+  height: var(--nav-height);
+}
+
+.min-h-nav {
+  min-height: var(--nav-height);
+}
+
+.pt-nav {
+  padding-top: var(--nav-height);
+}
+
+.mt-nav {
+  margin-top: var(--nav-height);
+}
+
+.top-nav {
+  top: var(--nav-height);
 }
 
 /* 공용 버튼 클래스 */
