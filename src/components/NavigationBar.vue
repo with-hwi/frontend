@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 
 const route = useRoute()
 const isScrolled = ref(false)
@@ -24,9 +24,15 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
 }
 
-watch([isHomePage, isScrolled], () => {
-  isTransparent.value = isHomePage.value && !isScrolled.value
-})
+watch(
+  [isHomePage, isScrolled],
+  () => {
+    setTimeout(() => {
+      isTransparent.value = isHomePage.value && !isScrolled.value
+    })
+  },
+  { immediate: true },
+)
 
 const navLinkClasses = computed(() => {
   if (isTransparent.value) {
