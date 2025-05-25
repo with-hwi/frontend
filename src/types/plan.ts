@@ -33,6 +33,10 @@ export interface InviteCodeItem {
   inviteCode: string
   validUntil: Date
 }
+export interface InviteInfoItem {
+  nickname: string
+  title: string
+}
 
 let attractionId = 0
 export const mockAttractions = [

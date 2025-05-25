@@ -10,6 +10,7 @@ import type {
 } from '@/types/dto/plan'
 import type {
   InviteCodeItem,
+  InviteInfoItem,
   ParticipantItem,
   PlanItem,
   PointItem,
@@ -153,3 +154,11 @@ export const createInviteCode = (planId: number) =>
     inviteCode: response.data.inviteCode,
     validUntil: deserializeDate(response.data.validUntil),
   }))
+
+export const getInviteInfo = (inviteCode: string) =>
+  planApi.getInviteInfo(inviteCode).then<InviteInfoItem>((response) => ({
+    nickname: response.data.nickname,
+    title: response.data.title,
+  }))
+
+export const acceptInvite = (inviteCode: string) => planApi.acceptInvite(inviteCode)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Vue3Lottie } from 'vue3-lottie'
 import HeroBanner from '@/components/home/HeroBanner.vue'
 import TravelPlanMapCard from '@/components/home/TravelPlanMapCard.vue'
@@ -10,9 +10,12 @@ import ServiceImageAI from '@/components/home/ServiceImageAI.vue'
 import ServiceImageCollaborate from '@/components/home/ServiceImageCollaborate.vue'
 import logoLottie from '@/assets/trabuddy/logo_text_lottie.json'
 import { usePlanModalStore } from '@/stores/planModalStore'
+import { useInviteModalStore } from '@/stores/inviteModalStore'
 
+const route = useRoute()
 const router = useRouter()
 const planModalStore = usePlanModalStore()
+const inviteModalStore = useInviteModalStore()
 
 const navigateToSearch = () => {
   router.push('/search')
@@ -22,6 +25,11 @@ const navigateToSearch = () => {
 const openCreatePlan = () => {
   planModalStore.openCreatePlanModal()
 }
+
+// 컴포넌트 마운트 시 초대 코드 확인
+onMounted(() => {
+  inviteModalStore.checkInviteCode(route, router)
+})
 </script>
 
 <template>

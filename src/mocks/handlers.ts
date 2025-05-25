@@ -13,8 +13,9 @@ import type {
   PlanNicknameResDto,
   CreatePlanReqDto,
   CreatePlanResDto,
+  AcceptInviteReqDto,
 } from '@/types/dto/plan'
-import type { PlanItem, PointItem } from '@/types/plan'
+import type { InviteInfoItem, PlanItem, PointItem } from '@/types/plan'
 import type { AttractionItem } from '@/types/tour'
 import { deserializeDate, serializeDate } from '@/utils/date'
 import { http, HttpResponse } from 'msw'
@@ -31,6 +32,19 @@ export const handlers = [
       title: body.title,
       createdAt: serializeDate(new Date()),
     })
+  }),
+
+  http.get(`*/api/v1/plans/join`, ({ request }) => {
+    const url = new URL(request.url)
+    return HttpResponse.json<InviteInfoItem>({
+      nickname: '꿈꾸는 라이언',
+      title: '제주도 무계획 여행',
+    })
+  }),
+
+  http.post(`*/api/v1/plans/join`, async ({ request }) => {
+    const body = (await request.json()) as AcceptInviteReqDto
+    return HttpResponse.json()
   }),
 
   http.get(`*/api/v1/plans/:planId`, ({ params }) => {

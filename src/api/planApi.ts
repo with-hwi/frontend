@@ -17,6 +17,7 @@ import type {
   CreatePointReqDto,
   GetPointsResDto,
   CreateInviteCodeResDto,
+  GetInviteInfoResDto,
 } from '@/types/dto/plan'
 
 const defaultParams = {}
@@ -86,6 +87,18 @@ const updateNickname = (planId: number, userId: number, data: PlanNicknameReqDto
 const createInviteCode = (planId: number) =>
   axios.post<CreateInviteCodeResDto>(`${API_BASE_URL}/api/v1/plans/${planId}/invite`)
 
+const getInviteInfo = (inviteCode: string) =>
+  axios.get<GetInviteInfoResDto>(`${API_BASE_URL}/api/v1/plans/join`, {
+    params: {
+      inviteCode,
+    },
+  })
+
+const acceptInvite = (inviteCode: string) =>
+  axios.post(`${API_BASE_URL}/api/v1/plans/join`, {
+    inviteCode,
+  })
+
 export default {
   getPlan,
   createPlan,
@@ -100,4 +113,6 @@ export default {
   deletePoint,
   updateNickname,
   createInviteCode,
+  getInviteInfo,
+  acceptInvite,
 }

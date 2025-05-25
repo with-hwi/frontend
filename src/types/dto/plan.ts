@@ -111,3 +111,12 @@ export interface CreateInviteCodeResDto {
   inviteCode: string
   validUntil: string
 }
+
+export interface GetInviteInfoResDto {
+  nickname: string
+  title: string
+}
+
+export interface AcceptInviteReqDto {
+  inviteCode: string
+}

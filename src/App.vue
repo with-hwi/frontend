@@ -3,6 +3,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import NavigationBar from '@/components/NavigationBar.vue'
 import CreatePlanModal from '@/components/modals/CreatePlanModal.vue'
 import LoginModal from '@/components/modals/LoginModal.vue'
+import InviteModal from '@/components/modals/InviteModal.vue'
 </script>
 
 <template>
@@ -20,6 +21,9 @@ import LoginModal from '@/components/modals/LoginModal.vue'
 
     <!-- 로그인 모달 -->
     <LoginModal />
+
+    <!-- 초대 모달 -->
+    <InviteModal />
   </div>
 </template>
 
