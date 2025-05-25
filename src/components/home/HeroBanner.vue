@@ -1,21 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const currentImageIndex = ref(0)
+const imageCount = 10
+const currentImageIndex = ref(Math.floor(Math.random() * imageCount))
 const isImageLoaded = ref(false)
-
-const bannerImages = [
-  '/images/home/banner1.webp',
-  '/images/home/banner2.webp',
-  '/images/home/banner3.webp',
-  '/images/home/banner4.webp',
-  '/images/home/banner5.webp',
-  '/images/home/banner6.webp',
-  '/images/home/banner7.webp',
-  '/images/home/banner8.webp',
-  '/images/home/banner9.webp',
-  '/images/home/banner10.webp',
-]
+const bannerImages = Array.from(
+  { length: imageCount },
+  (_, index) => `/images/home/banner${index + 1}.webp`,
+)
 
 let intervalId: number | null = null
 
@@ -28,10 +20,11 @@ onMounted(() => {
   const firstImage = new Image()
   firstImage.onload = () => {
     isImageLoaded.value = true
-    // 3초마다 이미지 변경
+    // 5초마다 이미지 변경
     intervalId = window.setInterval(nextImage, 5000)
   }
-  firstImage.src = bannerImages[0]
+  // 랜덤한 이미지부터 시작
+  firstImage.src = bannerImages[currentImageIndex.value]
 })
 
 onUnmounted(() => {
