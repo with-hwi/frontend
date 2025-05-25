@@ -36,11 +36,11 @@ watch(
   { immediate: true },
 )
 
-const navLinkClasses = computed(() => {
+const activeLinkClasses = computed(() => {
   if (isTransparent.value) {
     return '!text-primary-600'
   } else {
-    return '!text-primary-300 !font-bold'
+    return '!text-primary-500'
   }
 })
 
@@ -97,22 +97,10 @@ onUnmounted(() => {
               'text-gray-700 hover:text-primary-600 hover:bg-primary-50': !isTransparent,
               'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': isTransparent,
             }"
-            :active-class="navLinkClasses"
+            :active-class="activeLinkClasses"
           >
             {{ route.label }}
           </RouterLink>
-
-          <!-- 플랜 생성 버튼 -->
-          <button
-            @click="planModalStore.openCreatePlanModal"
-            class="px-3 py-2 rounded-md text-md font-medium transition-all duration-300 ease-out will-change-transform cursor-pointer"
-            :class="{
-              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': !isTransparent,
-              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': isTransparent,
-            }"
-          >
-            플랜 생성
-          </button>
         </div>
 
         <!-- 프로필 버튼 -->
@@ -124,13 +112,14 @@ onUnmounted(() => {
             :class="{
               'bg-accent-500 hover:bg-accent-600 text-white border border-transparent':
                 !isTransparent,
-              'bg-accent-500/90 hover:bg-accent-500 text-white border border-accent-400/50 hover:border-accent-400':
+              'bg-white/20 hover:bg-white/20 text-white border border-white/50 hover:border-white/70':
                 isTransparent,
             }"
           >
-            + 플랜 생성
+            새 플랜 만들기
           </button>
 
+          <!-- 로그인 버튼 -->
           <button
             class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
             :class="{
