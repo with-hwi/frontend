@@ -8,7 +8,13 @@ import type {
   UpdatePlanReqDto,
   UpdatePointReqDto,
 } from '@/types/dto/plan'
-import type { ParticipantItem, PlanItem, PointItem, VisibilityType } from '@/types/plan'
+import type {
+  InviteCodeItem,
+  ParticipantItem,
+  PlanItem,
+  PointItem,
+  VisibilityType,
+} from '@/types/plan'
 import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
 
 export const getPlan = async (planId: number) => {
@@ -141,3 +147,9 @@ export const updateNickname = (
   planApi
     .updateNickname(planId, userId, { nickname } as PlanNicknameReqDto)
     .then((response) => response.data)
+
+export const createInviteCode = (planId: number) =>
+  planApi.createInviteCode(planId).then<InviteCodeItem>((response) => ({
+    inviteCode: response.data.inviteCode,
+    validUntil: deserializeDate(response.data.validUntil),
+  }))

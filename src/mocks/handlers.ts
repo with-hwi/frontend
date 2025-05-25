@@ -138,6 +138,13 @@ export const handlers = [
     return HttpResponse.json({ userId, nickname: body.nickname } as PlanNicknameResDto)
   }),
 
+  http.post(`*/api/v1/plans/:planId/invite`, () => {
+    return HttpResponse.json({
+      inviteCode: '123456',
+      validUntil: '2025-06-27 10:00:00',
+    })
+  }),
+
   http.get(`*/api/v1/plans/:planId/points`, () => {
     return HttpResponse.json(mockGetPointDtos)
   }),

@@ -106,3 +106,8 @@ export interface PlanNicknameResDto {
   userId: number
   nickname: string
 }
+
+export interface CreateInviteCodeResDto {
+  inviteCode: string
+  validUntil: string
+}

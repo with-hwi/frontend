@@ -29,6 +29,11 @@ export interface PointItem {
 
 export type VisibilityType = 'hidden' | 'open'
 
+export interface InviteCodeItem {
+  inviteCode: string
+  validUntil: Date
+}
+
 let attractionId = 0
 export const mockAttractions = [
   {

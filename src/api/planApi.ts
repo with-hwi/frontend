@@ -16,6 +16,7 @@ import type {
   UpdateParticipantResDto,
   CreatePointReqDto,
   GetPointsResDto,
+  CreateInviteCodeResDto,
 } from '@/types/dto/plan'
 
 const defaultParams = {}
@@ -82,6 +83,9 @@ const updateNickname = (planId: number, userId: number, data: PlanNicknameReqDto
     ...data,
   })
 
+const createInviteCode = (planId: number) =>
+  axios.post<CreateInviteCodeResDto>(`${API_BASE_URL}/api/v1/plans/${planId}/invite`)
+
 export default {
   getPlan,
   createPlan,
@@ -95,4 +99,5 @@ export default {
   updatePoint,
   deletePoint,
   updateNickname,
+  createInviteCode,
 }
