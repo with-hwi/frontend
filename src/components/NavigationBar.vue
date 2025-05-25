@@ -1,0 +1,112 @@
+<script setup lang="ts">
+import { RouterLink, useRoute } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+
+const route = useRoute()
+const isScrolled = ref(false)
+
+const isHomePage = computed(() => route.name === 'home')
+
+// 네비게이션 라우트 목록
+const routes = [
+  { name: 'home', path: '/', label: '홈' },
+  { name: 'search', path: '/search', label: '여행지 검색' },
+  { name: 'plan', path: '/plan/0', label: '플랜' },
+]
+// <RouterLink to="/">Home</RouterLink>
+// <RouterLink to="/about">About</RouterLink>
+// <RouterLink to="/search">여행지 검색</RouterLink>
+// <RouterLink to="/plan/0">여행 계획</RouterLink>
+// <a @click="openCreatePlanModal" class="cursor-pointer">계획 생성</a>
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 20
+}
+
+const navLinkClasses = computed(() => {
+  if (isScrolled.value) {
+    return '!text-primary-600'
+  } else {
+    return '!text-primary-300 !font-bold'
+  }
+})
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+</script>
+
+<template>
+  <header
+    class="fixed top-0 left-0 right-0 z-50 will-change-transform"
+    :class="{
+      'bg-white/90 backdrop-blur-md shadow-sm translate-y-0': isScrolled,
+      'bg-gradient-to-b from-black/30 to-transparent -translate-y-0': !isScrolled,
+    }"
+    style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+  >
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex relative justify-between items-center h-16">
+        <!-- 서비스 로고 -->
+        <div class="flex items-center">
+          <RouterLink
+            to="/"
+            class="flex items-center space-x-2 text-2xl font-bold transition-all duration-300 ease-out will-change-transform"
+            :class="{
+              'text-primary-700 transform translate-x-0': isScrolled,
+              'text-white drop-shadow-lg transform translate-x-0': !isScrolled && !isHomePage,
+              'opacity-0 pointer-events-none': isHomePage && !isScrolled,
+              'opacity-100 pointer-events-auto': !isHomePage || isScrolled,
+            }"
+          >
+            <!-- 홈이 아닌 페이지에서는 항상 로고 이미지 표시, 홈에서는 스크롤 시에만 표시 -->
+            <img
+              src="/images/trabuddy/logo.png"
+              alt="Trabuddy 로고"
+              class="h-12 transition-all duration-300 ease-out will-change-transform"
+              :class="{
+                'opacity-100': !isHomePage || isScrolled,
+                'opacity-0': isHomePage && !isScrolled,
+              }"
+            />
+          </RouterLink>
+        </div>
+
+        <!-- 네비게이션 메뉴 -->
+        <div class="hidden absolute inset-0 justify-self-center sm:flex items-center space-x-8">
+          <RouterLink
+            v-for="route in routes"
+            :to="route.path"
+            :key="route.name"
+            class="px-3 py-2 rounded-md text-md font-medium transition-all duration-300 ease-out will-change-transform"
+            :class="{
+              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': isScrolled,
+              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': !isScrolled,
+            }"
+            :active-class="navLinkClasses"
+          >
+            {{ route.label }}
+          </RouterLink>
+        </div>
+
+        <!-- 프로필 버튼 -->
+        <div class="flex items-center">
+          <button
+            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
+            :class="{
+              'bg-primary-600 hover:bg-primary-700 border border-transparent': isScrolled,
+              'bg-white/20 hover:bg-white/20 border border-white/50 hover:border-white/70':
+                !isScrolled,
+            }"
+          >
+            로그인
+          </button>
+        </div>
+      </div>
+    </nav>
+  </header>
+</template>
