@@ -9,15 +9,18 @@ import ServiceImagePlan from '@/components/home/ServiceImagePlan.vue'
 import ServiceImageAI from '@/components/home/ServiceImageAI.vue'
 import ServiceImageCollaborate from '@/components/home/ServiceImageCollaborate.vue'
 import logoLottie from '@/assets/trabuddy/logo_text_lottie.json'
+import { usePlanModalStore } from '@/stores/planModalStore'
 
 const router = useRouter()
+const planModalStore = usePlanModalStore()
 
 const navigateToSearch = () => {
   router.push('/search')
 }
 
-const navigateToPlan = () => {
-  router.push('/plan')
+// 플랜 생성 모달 열기
+const openCreatePlan = () => {
+  planModalStore.openCreatePlanModal()
 }
 </script>
 
@@ -73,7 +76,7 @@ const navigateToPlan = () => {
 
             <div class="flex flex-col sm:flex-row gap-4">
               <button @click="navigateToSearch" class="btn-primary">여행지 찾기</button>
-              <button @click="navigateToPlan" class="btn-transparent">플랜 만들기</button>
+              <button @click="openCreatePlan" class="btn-transparent">플랜 만들기</button>
             </div>
           </div>
 
@@ -146,7 +149,7 @@ const navigateToPlan = () => {
             </p> -->
             <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
               <!-- <button @click="navigateToSearch" class="btn-primary-reverse">여행지 둘러보기</button> -->
-              <button @click="navigateToPlan" class="btn-primary-dark">나의 첫 플랜 만들기</button>
+              <button @click="openCreatePlan" class="btn-primary-dark">나의 첫 플랜 만들기</button>
             </div>
           </div>
         </div>

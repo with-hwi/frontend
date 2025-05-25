@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { usePlanModalStore } from '@/stores/planModalStore'
 
 const route = useRoute()
 const isScrolled = ref(false)
+const planModalStore = usePlanModalStore()
 
 const isTransparent = ref(true)
 const isHomePage = computed(() => route.name === 'home')
@@ -99,10 +101,36 @@ onUnmounted(() => {
           >
             {{ route.label }}
           </RouterLink>
+
+          <!-- 플랜 생성 버튼 -->
+          <button
+            @click="planModalStore.openCreatePlanModal"
+            class="px-3 py-2 rounded-md text-md font-medium transition-all duration-300 ease-out will-change-transform cursor-pointer"
+            :class="{
+              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': !isTransparent,
+              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': isTransparent,
+            }"
+          >
+            플랜 생성
+          </button>
         </div>
 
         <!-- 프로필 버튼 -->
-        <div class="flex items-center">
+        <div class="flex items-center space-x-3">
+          <!-- 플랜 생성 CTA 버튼 (모바일에서도 표시) -->
+          <button
+            @click="planModalStore.openCreatePlanModal"
+            class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out"
+            :class="{
+              'bg-accent-500 hover:bg-accent-600 text-white border border-transparent':
+                !isTransparent,
+              'bg-accent-500/90 hover:bg-accent-500 text-white border border-accent-400/50 hover:border-accent-400':
+                isTransparent,
+            }"
+          >
+            + 플랜 생성
+          </button>
+
           <button
             class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
             :class="{
