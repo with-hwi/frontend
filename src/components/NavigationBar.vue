@@ -2,12 +2,14 @@
 import { RouterLink, useRoute } from 'vue-router'
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { usePlanModalStore } from '@/stores/planModalStore'
+import { useLoginModalStore } from '@/stores/loginModalStore'
 import { useUserStore } from '@/stores/userStore'
 import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
 
 const route = useRoute()
 const isScrolled = ref(false)
 const planModalStore = usePlanModalStore()
+const loginModalStore = useLoginModalStore()
 const userStore = useUserStore()
 
 const isTransparent = ref(true)
@@ -137,6 +139,7 @@ onUnmounted(() => {
           <!-- 로그인되지 않은 경우: 로그인 버튼만 표시 -->
           <template v-else>
             <button
+              @click="loginModalStore.openLoginModal"
               class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
               :class="{
                 'bg-primary-600 hover:bg-primary-700 border border-transparent': !isTransparent,
