@@ -1,6 +1,5 @@
 import axios from '@/api/axiosInstance'
 import { API_BASE_URL } from '@/constants/urls'
-import router from '@/router'
 import Cookies from 'js-cookie'
 import { defineStore } from 'pinia'
 import { readonly, ref } from 'vue'
@@ -44,8 +43,6 @@ export const useAuthStore = defineStore(
 
       Cookies.remove('auth_token')
       Cookies.remove('refresh_token')
-
-      router.push('/')
     }
 
     return {

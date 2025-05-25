@@ -5,12 +5,15 @@ import { usePlanModalStore } from '@/stores/planModalStore'
 import { useLoginModalStore } from '@/stores/loginModalStore'
 import { useUserStore } from '@/stores/userStore'
 import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
+import Popover from 'primevue/popover'
+import { logout } from '@/services/authService'
 
 const route = useRoute()
 const isScrolled = ref(false)
 const planModalStore = usePlanModalStore()
 const loginModalStore = useLoginModalStore()
 const userStore = useUserStore()
+const profilePopover = ref()
 
 const isTransparent = ref(true)
 const isHomePage = computed(() => route.name === 'home')
@@ -51,6 +54,17 @@ const activeLinkClasses = computed(() => {
     return '!text-primary-500'
   }
 })
+
+// 프로필 메뉴 토글
+const toggleProfileMenu = (event: Event) => {
+  profilePopover.value.toggle(event)
+}
+
+// 로그아웃 처리
+const handleLogout = () => {
+  logout()
+  profilePopover.value.hide()
+}
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
@@ -133,7 +147,52 @@ onUnmounted(() => {
               :nickname="userStore.userInfo?.nickname || '사용자'"
               :size="36"
               class="cursor-pointer hover:ring-2 hover:ring-white/50 transition-all duration-200"
+              @click="toggleProfileMenu"
             />
+
+            <!-- 프로필 메뉴 팝오버 -->
+            <Popover ref="profilePopover" class="w-48">
+              <div
+                class="bg-white rounded-lg shadow-lg border border-secondary-200 overflow-hidden"
+              >
+                <div class="py-1">
+                  <!-- 프로필 페이지로 이동 (아직 구현 안됨) -->
+                  <button
+                    class="w-full px-4 py-3 text-left text-sm text-secondary-700 hover:bg-secondary-50 transition-colors duration-200 flex items-center space-x-2"
+                    disabled
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    <span class="text-secondary-400">프로필 (준비중)</span>
+                  </button>
+
+                  <!-- 구분선 -->
+                  <div class="border-t border-secondary-200 my-1"></div>
+
+                  <!-- 로그아웃 -->
+                  <button
+                    @click="handleLogout"
+                    class="w-full px-4 py-3 text-left text-sm text-secondary-700 hover:bg-secondary-50 transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    <span>로그아웃</span>
+                  </button>
+                </div>
+              </div>
+            </Popover>
           </template>
 
           <!-- 로그인되지 않은 경우: 로그인 버튼만 표시 -->
