@@ -4,8 +4,8 @@
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >
-    <img :src="markerImage" />
-    <span class="absolute top-[2px] text-center left-0 right-0 text-black font-bold text-sm">
+    <img :src="markerImage" class="overflow-visible" />
+    <span class="absolute top-[4px] text-center left-0 right-0 text-primary-900 font-bold text-sm">
       {{ number }}
     </span>
   </div>
@@ -24,9 +24,9 @@ const hovered = ref(false)
 
 const markerImage = computed(() => {
   if (props.highlighted || hovered.value) {
-    return '/images/marker_ordered_hover.png'
+    return '/images/map/marker_ordered_hover.svg'
   }
-  return '/images/marker_ordered.png'
+  return '/images/map/marker_ordered.svg'
 })
 </script>
 

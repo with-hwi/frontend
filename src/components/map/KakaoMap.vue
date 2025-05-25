@@ -84,7 +84,7 @@ const loadMap = () => {
 
   // 기본 마커 이미지 생성
   normalMarkerImage = new window.kakao.maps.MarkerImage(
-    '/images/marker.png', // 마커 이미지 URL - public 폴더에 이미지 추가 필요
+    '/images/map/marker.svg', // 마커 이미지 URL - public 폴더에 이미지 추가 필요
     normalMarkerSize,
     {
       offset: new window.kakao.maps.Point(NORMAL_MARKER_SIZE / 2, NORMAL_MARKER_SIZE), // 마커 좌표에 일치시킬 이미지 내에서의 좌표
@@ -93,7 +93,7 @@ const loadMap = () => {
 
   // 마우스오버시 표시할 마커 이미지 생성
   hoverMarkerImage = new window.kakao.maps.MarkerImage(
-    '/images/marker_hover.png', // 마커 이미지 URL - public 폴더에 이미지 추가 필요
+    '/images/map/marker_hover.svg', // 마커 이미지 URL - public 폴더에 이미지 추가 필요
     hoverMarkerSize,
     {
       offset: new window.kakao.maps.Point(HOVER_MARKER_SIZE / 2, HOVER_MARKER_SIZE), // 마커 좌표에 일치시킬 이미지 내에서의 좌표
@@ -203,7 +203,7 @@ const displayNumberedMarkers = () => {
       map: kakaoMap.value,
       position: position,
       content: markerEl,
-      yAnchor: 1.0,
+      yAnchor: 1.1,
       zIndex: 2,
     })
 
@@ -233,9 +233,9 @@ const displayNumberedMarkers = () => {
       map: kakaoMap.value,
       path: positions,
       strokeWeight: 3,
-      strokeColor: '#5882FA',
-      strokeOpacity: 0.8,
-      strokeStyle: 'dashed',
+      strokeColor: '#87a553',
+      strokeOpacity: 0.6,
+      strokeStyle: 'solid',
     })
   }
 
@@ -292,12 +292,20 @@ watch(
 
           // 여행지 정보 오버레이 내용 설정
           const content = `
-            <div class="attraction-info-overlay">
-              <div class="attraction-info-overlay-content">
-                ${props.attractionInfoContent}
+            <div class="relative">
+              <div class="bg-white rounded-2xl shadow-lg border border-secondary-200 min-w-80 max-w-96 overflow-hidden relative">
+                <div class="p-4">
+                  ${props.attractionInfoContent}
+                </div>
+                <button 
+                  class="absolute top-3 right-3 w-8 h-8 bg-secondary-100 hover:bg-secondary-200 rounded-full flex items-center justify-center text-secondary-600 hover:text-secondary-800 transition-colors duration-200 text-lg font-medium leading-none"
+                  onclick="window.closeAttractionInfoOverlay()"
+                  style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                >
+                  ×
+                </button>
               </div>
-              <div class="attraction-info-overlay-arrow"></div>
-              <button class="attraction-info-overlay-close" onclick="window.closeAttractionInfoOverlay()">×</button>
+              <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white border-r border-b border-secondary-200 rotate-45 z-10"></div>
             </div>
           `
 
@@ -378,12 +386,20 @@ watch(
   (newContent) => {
     if (attractionInfoOverlay.value && newContent && props.selectedAttractionOrPoint) {
       const content = `
-        <div class="attraction-info-overlay">
-          <div class="attraction-info-overlay-content">
-            ${newContent}
+        <div class="relative">
+          <div class="bg-white rounded-2xl shadow-lg border border-secondary-200 min-w-80 max-w-96 overflow-hidden relative">
+            <div class="p-4">
+              ${newContent}
+            </div>
+            <button 
+              class="absolute top-3 right-3 w-8 h-8 bg-secondary-100 hover:bg-secondary-200 rounded-full flex items-center justify-center text-secondary-600 hover:text-secondary-800 transition-colors duration-200 text-lg font-medium leading-none"
+              onclick="window.closeAttractionInfoOverlay()"
+              style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+            >
+              ×
+            </button>
           </div>
-          <div class="attraction-info-overlay-arrow"></div>
-          <button class="attraction-info-overlay-close" onclick="window.closeAttractionInfoOverlay()">×</button>
+          <div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-white border-r border-b border-secondary-200 rotate-45 z-10"></div>
         </div>
       `
       attractionInfoOverlay.value.setContent(content)
@@ -450,92 +466,7 @@ onMounted(async () => {
   height: 100%;
 }
 
-/* 여행지 정보 오버레이 스타일 */
-:deep(.attraction-info-overlay) {
-  position: relative;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  max-width: 320px;
-  padding: 0;
-  transform: translateY(-10px);
-  transition: transform 0.2s ease;
-  overflow: hidden;
-}
-
-:deep(.attraction-info-overlay-content) {
-  padding: 15px;
-}
-
-:deep(.attraction-info-overlay-arrow) {
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  background: #fff;
-  transform: translateX(-50%) rotate(45deg);
-  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.1);
-}
-
-:deep(.attraction-info-overlay-close) {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.1);
-  color: #333;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-:deep(.attraction-info-overlay-close:hover) {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-:deep(.attraction-info-window) {
-  padding: 0;
-  max-width: 100%;
-}
-
-:deep(.attraction-info-window h3) {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-:deep(.attraction-info-window p) {
-  margin: 8px 0;
-  font-size: 13px;
-  color: #666;
-  line-height: 1.4;
-}
-
-:deep(.attraction-info-image) {
-  width: 100%;
-  height: 160px;
-  overflow: hidden;
-  margin: 0 0 10px 0;
-  border-radius: 6px;
-}
-
-:deep(.attraction-info-image img) {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-:deep(.attraction-info-image img:hover) {
-  transform: scale(1.05);
+svg {
+  overflow: visible;
 }
 </style>
