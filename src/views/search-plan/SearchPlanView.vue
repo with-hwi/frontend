@@ -698,7 +698,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="search-plan-view-container">
+  <div class="search-plan-view-container pt-nav">
     <div class="plan-body-container">
       <aside v-if="mode === 'plan'" class="plan-left-panel shadow-xs">
         <span>plan side panel</span>
@@ -1149,7 +1149,7 @@ onUnmounted(() => {
 
 .search-plan-view-container {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   position: relative;
   display: flex;
   flex-direction: column;
