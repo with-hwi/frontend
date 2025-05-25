@@ -11,6 +11,12 @@ import router from './router'
 
 const app = createApp(App)
 
+// Setup FontAwesome
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+library.add(fas)
+
 async function prepareApp() {
   if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API) {
     const { worker } = await import('./mocks/browser')
@@ -30,6 +36,8 @@ async function prepareApp() {
       preset: TrabuddyPreset,
     },
   })
+
+  app.component('font-awesome-icon', FontAwesomeIcon)
 
   app.mount('#app')
 }
