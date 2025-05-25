@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 
 const route = useRoute()
 const isScrolled = ref(false)
 
+const isTransparent = ref(true)
 const isHomePage = computed(() => route.name === 'home')
 
 // 네비게이션 라우트 목록
@@ -23,8 +24,12 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
 }
 
+watch([isHomePage, isScrolled], () => {
+  isTransparent.value = isHomePage.value && !isScrolled.value
+})
+
 const navLinkClasses = computed(() => {
-  if (isScrolled.value) {
+  if (isTransparent.value) {
     return '!text-primary-600'
   } else {
     return '!text-primary-300 !font-bold'
@@ -41,11 +46,12 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <!-- 배경이 투명할 경우 가독성을 위해 검은 그라데이션 배경 표시 -->
   <header
     class="fixed top-0 left-0 right-0 z-50 will-change-transform"
     :class="{
-      'bg-white/90 backdrop-blur-md shadow-sm translate-y-0': isScrolled,
-      'bg-gradient-to-b from-black/30 to-transparent -translate-y-0': !isScrolled,
+      'bg-white/90 backdrop-blur-md shadow-sm translate-y-0': !isTransparent,
+      'bg-gradient-to-b from-black/30 to-transparent -translate-y-0': isTransparent,
     }"
     style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
   >
@@ -57,21 +63,17 @@ onUnmounted(() => {
             to="/"
             class="flex items-center space-x-2 text-2xl font-bold transition-all duration-300 ease-out will-change-transform"
             :class="{
-              'text-primary-700 transform translate-x-0': isScrolled,
-              'text-white drop-shadow-lg transform translate-x-0': !isScrolled && !isHomePage,
-              'opacity-0 pointer-events-none': isHomePage && !isScrolled,
-              'opacity-100 pointer-events-auto': !isHomePage || isScrolled,
+              'text-primary-700 transform translate-x-0': !isTransparent,
+              'text-white drop-shadow-lg transform translate-x-0': isTransparent,
+              'opacity-0 pointer-events-none': isTransparent,
+              'opacity-100 pointer-events-auto': !isTransparent,
             }"
           >
-            <!-- 홈이 아닌 페이지에서는 항상 로고 이미지 표시, 홈에서는 스크롤 시에만 표시 -->
+            <!-- 서비스 로고는 배경이 투명하지 않을 때만 표시 -->
             <img
               src="/images/trabuddy/logo.png"
               alt="Trabuddy 로고"
               class="h-12 transition-all duration-300 ease-out will-change-transform"
-              :class="{
-                'opacity-100': !isHomePage || isScrolled,
-                'opacity-0': isHomePage && !isScrolled,
-              }"
             />
           </RouterLink>
         </div>
@@ -84,8 +86,8 @@ onUnmounted(() => {
             :key="route.name"
             class="px-3 py-2 rounded-md text-md font-medium transition-all duration-300 ease-out will-change-transform"
             :class="{
-              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': isScrolled,
-              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': !isScrolled,
+              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': !isTransparent,
+              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': isTransparent,
             }"
             :active-class="navLinkClasses"
           >
@@ -98,9 +100,9 @@ onUnmounted(() => {
           <button
             class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
             :class="{
-              'bg-primary-600 hover:bg-primary-700 border border-transparent': isScrolled,
+              'bg-primary-600 hover:bg-primary-700 border border-transparent': !isTransparent,
               'bg-white/20 hover:bg-white/20 border border-white/50 hover:border-white/70':
-                !isScrolled,
+                isTransparent,
             }"
           >
             로그인
