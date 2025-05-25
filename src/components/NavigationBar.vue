@@ -2,13 +2,19 @@
 import { RouterLink, useRoute } from 'vue-router'
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { usePlanModalStore } from '@/stores/planModalStore'
+import { useUserStore } from '@/stores/userStore'
+import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
 
 const route = useRoute()
 const isScrolled = ref(false)
 const planModalStore = usePlanModalStore()
+const userStore = useUserStore()
 
 const isTransparent = ref(true)
 const isHomePage = computed(() => route.name === 'home')
+
+// 로그인 여부 확인
+const isLoggedIn = computed(() => userStore.userInfo !== null)
 
 // 네비게이션 라우트 목록
 const routes = [
@@ -101,35 +107,46 @@ onUnmounted(() => {
           >
             {{ route.label }}
           </RouterLink>
-        </div>
 
-        <!-- 프로필 버튼 -->
-        <div class="flex items-center space-x-3">
-          <!-- 플랜 생성 CTA 버튼 (모바일에서도 표시) -->
+          <!-- 새 플랜 만들기 버튼 (로그인된 경우에만 표시) -->
           <button
+            v-if="isLoggedIn"
             @click="planModalStore.openCreatePlanModal"
-            class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out"
+            class="px-3 py-2 rounded-md text-md font-medium transition-all duration-300 ease-out will-change-transform"
             :class="{
-              'bg-accent-500 hover:bg-accent-600 text-white border border-transparent':
-                !isTransparent,
-              'bg-white/20 hover:bg-white/20 text-white border border-white/50 hover:border-white/70':
-                isTransparent,
+              'text-gray-700 hover:text-primary-600 hover:bg-primary-50': !isTransparent,
+              'text-white/90 hover:text-white hover:bg-white/10 drop-shadow-sm': isTransparent,
             }"
           >
             새 플랜 만들기
           </button>
+        </div>
 
-          <!-- 로그인 버튼 -->
-          <button
-            class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
-            :class="{
-              'bg-primary-600 hover:bg-primary-700 border border-transparent': !isTransparent,
-              'bg-white/20 hover:bg-white/20 border border-white/50 hover:border-white/70':
-                isTransparent,
-            }"
-          >
-            로그인
-          </button>
+        <!-- 프로필 버튼 -->
+        <div class="flex items-center space-x-3">
+          <!-- 로그인된 경우: 새 플랜 만들기 버튼과 프로필 아이콘 -->
+          <template v-if="isLoggedIn">
+            <!-- 사용자 프로필 아이콘 -->
+            <MockProfileIcon
+              :nickname="userStore.userInfo?.nickname || '사용자'"
+              :size="36"
+              class="cursor-pointer hover:ring-2 hover:ring-white/50 transition-all duration-200"
+            />
+          </template>
+
+          <!-- 로그인되지 않은 경우: 로그인 버튼만 표시 -->
+          <template v-else>
+            <button
+              class="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-300 ease-in-out"
+              :class="{
+                'bg-primary-600 hover:bg-primary-700 border border-transparent': !isTransparent,
+                'bg-white/20 hover:bg-white/30 border border-white/50 hover:border-white/70':
+                  isTransparent,
+              }"
+            >
+              로그인
+            </button>
+          </template>
         </div>
       </div>
     </nav>
