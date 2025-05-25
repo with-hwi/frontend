@@ -2,12 +2,12 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Vue3Lottie } from 'vue3-lottie'
-import HeroBanner from '@/components/HeroBanner.vue'
-import TravelPlanMapCard from '@/components/TravelPlanMapCard.vue'
-import ServiceSection from '@/components/ServiceSection.vue'
-import ServiceImagePlan from '@/components/ServiceImagePlan.vue'
-import ServiceImageAI from '@/components/ServiceImageAI.vue'
-import ServiceImageCollaborate from '@/components/ServiceImageCollaborate.vue'
+import HeroBanner from '@/components/home/HeroBanner.vue'
+import TravelPlanMapCard from '@/components/home/TravelPlanMapCard.vue'
+import ServiceSection from '@/components/home/ServiceSection.vue'
+import ServiceImagePlan from '@/components/home/ServiceImagePlan.vue'
+import ServiceImageAI from '@/components/home/ServiceImageAI.vue'
+import ServiceImageCollaborate from '@/components/home/ServiceImageCollaborate.vue'
 import logoLottie from '@/assets/trabuddy/logo_text_lottie.json'
 
 const router = useRouter()

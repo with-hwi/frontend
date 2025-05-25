@@ -8,7 +8,7 @@
       <!-- 압정 아이콘 -->
       <div class="absolute -top-4 -right-4 z-20">
         <img
-          src="/images/main/plan_map_thumbtack.png"
+          src="/images/home/plan_map_thumbtack.png"
           alt="압정"
           class="w-12 h-12 drop-shadow-lg"
         />
@@ -17,7 +17,7 @@
       <!-- 지도 이미지와 마커들 -->
       <div class="relative w-full h-80 rounded-xl overflow-hidden">
         <img
-          src="/images/main/plan_map_example.png"
+          src="/images/home/plan_map_example.png"
           alt="여행 지도"
           class="w-full h-full object-cover"
         />

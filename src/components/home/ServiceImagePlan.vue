@@ -90,7 +90,7 @@ const travelRoutes = ref([
         <!-- 오른쪽: 지도 영역 -->
         <div class="flex-1">
           <!--  지도 -->
-          <img class="h-full object-cover" src="/images/main/service_plan_example.png" />
+          <img class="h-full object-cover" src="/images/home/service_plan_example.png" />
         </div>
       </div>
     </div>

@@ -5,16 +5,16 @@ const currentImageIndex = ref(0)
 const isImageLoaded = ref(false)
 
 const bannerImages = [
-  '/images/main/banner1.webp',
-  '/images/main/banner2.webp',
-  '/images/main/banner3.webp',
-  '/images/main/banner4.webp',
-  '/images/main/banner5.webp',
-  '/images/main/banner6.webp',
-  '/images/main/banner7.webp',
-  '/images/main/banner8.webp',
-  '/images/main/banner9.webp',
-  '/images/main/banner10.webp',
+  '/images/home/banner1.webp',
+  '/images/home/banner2.webp',
+  '/images/home/banner3.webp',
+  '/images/home/banner4.webp',
+  '/images/home/banner5.webp',
+  '/images/home/banner6.webp',
+  '/images/home/banner7.webp',
+  '/images/home/banner8.webp',
+  '/images/home/banner9.webp',
+  '/images/home/banner10.webp',
 ]
 
 let intervalId: number | null = null
