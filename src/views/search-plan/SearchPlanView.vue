@@ -20,6 +20,8 @@ import AttractionInfoWindow from '@/components/map/AttractionInfoWindow.vue'
 import Pagination from '@/components/Pagination.vue'
 import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
+import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
+import PlanWizardModal from '@/components/plan/PlanWizardModal.vue'
 import {
   ref,
   reactive,
