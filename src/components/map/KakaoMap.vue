@@ -445,6 +445,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+#map {
+  width: 100%;
+  height: 100%;
+}
+
 /* 여행지 정보 오버레이 스타일 */
 :deep(.attraction-info-overlay) {
   position: relative;
