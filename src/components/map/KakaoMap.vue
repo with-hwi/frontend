@@ -203,7 +203,7 @@ const displayNumberedMarkers = () => {
       map: kakaoMap.value,
       position: position,
       content: markerEl,
-      yAnchor: 1.0,
+      yAnchor: 1.1,
       zIndex: 2,
     })
 
@@ -233,9 +233,9 @@ const displayNumberedMarkers = () => {
       map: kakaoMap.value,
       path: positions,
       strokeWeight: 3,
-      strokeColor: '#5882FA',
-      strokeOpacity: 0.8,
-      strokeStyle: 'dashed',
+      strokeColor: '#87a553',
+      strokeOpacity: 0.6,
+      strokeStyle: 'solid',
     })
   }
 
@@ -464,5 +464,9 @@ onMounted(async () => {
 #map {
   width: 100%;
   height: 100%;
+}
+
+svg {
+  overflow: visible;
 }
 </style>

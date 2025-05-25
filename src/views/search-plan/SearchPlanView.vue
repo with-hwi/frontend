@@ -62,6 +62,8 @@ import { planThemes } from '@/constants/plan_themes'
 import NullableDateInput from '@/components/NullableDateInput.vue'
 import Select from 'primevue/select'
 import Paginator from 'primevue/paginator'
+import InputNumber from 'primevue/inputnumber'
+import DatePicker from 'primevue/datepicker'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const route = useRoute()
@@ -151,6 +153,10 @@ const handleSidoChange = () => {
 }
 
 const handleSearch = () => {
+  if (!isSearchEnabled.value) {
+    return
+  }
+
   currentPage.value = 1 // 검색 시 첫 페이지로 이동
   fetchTourList()
 }
@@ -177,6 +183,11 @@ const handleAttractionFound = (attractions: AttractionItem[] | undefined) => {
   searchResults.value = attractions
   console.log('검색 결과:', attractions)
 }
+
+// 검색 가능 조건 충족 여부
+const isSearchEnabled = computed(() => {
+  return !(isTourLoading.value || (!selectedSido.value && !keyword.value))
+})
 
 // 카테고리별 아이콘 매핑 함수
 const getCategoryIcon = (categoryCode: string | undefined): string => {
@@ -306,7 +317,25 @@ const cachedPeople = ref<number>(1)
 
 // TODO: 사용자가 이 플랜의 주최자인지를 확인하는 로직 필요
 // 사용자 정보에서 userId를 받아올 수 있게 되면 추후 수정
-const tempUserId = ref(3)
+const tempUserId = ref(1)
+
+// 플랜 정보 섹션들의 접힘/펼침 상태
+const isPlanBasicInfoExpanded = ref(true)
+const isPlanCustomInfoExpanded = ref(true)
+const isParticipantsExpanded = ref(true)
+
+// 섹션 토글 함수들
+const togglePlanBasicInfo = () => {
+  isPlanBasicInfoExpanded.value = !isPlanBasicInfoExpanded.value
+}
+
+const togglePlanCustomInfo = () => {
+  isPlanCustomInfoExpanded.value = !isPlanCustomInfoExpanded.value
+}
+
+const toggleParticipants = () => {
+  isParticipantsExpanded.value = !isParticipantsExpanded.value
+}
 
 // 마법사 모달 관련
 const showWizardModal = ref(false)
@@ -725,27 +754,97 @@ onUnmounted(() => {
 <template>
   <div class="search-plan-view-container pt-nav">
     <div class="plan-body-container">
-      <aside v-if="mode === 'plan'" class="plan-left-panel shadow-xs">
-        <span>plan side panel</span>
-        <div ref="pointListRef" class="plan-left-panel-half-container">
-          <span class="text-2xl">경로 결과</span>
-          <point-list
-            :points="points ?? []"
-            :hovered-point="hoveredPoint"
-            :editable="isCurrentUserHost || isCurrentUserStaff"
-            @delete-point="handleDeletePoint"
-            @update-point="handleUpdatePoint"
-            @mouseenter="handlePointMouseEnter"
-            @mouseleave="handlePointMouseLeave"
-            @point-click="handlePointClick"
-          />
-        </div>
-        <div
-          id="search-card-mobile"
-          class="plan-left-panel-half-container"
-          :class="{ hidden: !isMobile }"
-        >
-          <span class="text-2xl">검색 결과</span>
+      <aside v-if="mode === 'plan'" class="plan-left-panel bg-white border-r border-secondary-200">
+        <div class="flex flex-col h-full">
+          <!-- 헤더 -->
+          <div
+            class="flex-shrink-0 px-6 py-4 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200"
+          >
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+              <h2 class="text-xl font-bold text-primary-800">여행 경로</h2>
+            </div>
+          </div>
+
+          <!-- 경로 목록 컨테이너 -->
+          <div ref="pointListRef" class="flex-1 overflow-y-auto px-4 py-4">
+            <point-list
+              :points="points ?? []"
+              :hovered-point="hoveredPoint"
+              :editable="isCurrentUserHost || isCurrentUserStaff"
+              @delete-point="handleDeletePoint"
+              @update-point="handleUpdatePoint"
+              @mouseenter="handlePointMouseEnter"
+              @mouseleave="handlePointMouseLeave"
+              @point-click="handlePointClick"
+            />
+
+            <!-- 빈 상태 표시 -->
+            <div
+              v-if="!points || points.length === 0"
+              class="flex flex-col items-center justify-center py-12 px-4"
+            >
+              <div
+                class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-8 h-8 text-secondary-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-secondary-700 mb-2">아직 경로가 없어요</h3>
+              <p class="text-secondary-500 text-center">
+                검색에서 여행지를 선택하여<br />나만의 여행 경로를 만들어보세요!
+              </p>
+            </div>
+          </div>
+
+          <!-- 모바일 검색 카드 영역 -->
+          <div
+            id="search-card-mobile"
+            class="flex-1 border-t border-secondary-200"
+            :class="{ hidden: !isMobile }"
+          >
+            <div
+              class="px-6 py-4 bg-gradient-to-r from-accent-50 to-accent-100 border-b border-accent-200"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-accent-500 rounded-lg flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <h2 class="text-xl font-bold text-accent-800">검색 결과</h2>
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
       <div class="search-view-container">
@@ -762,7 +861,10 @@ onUnmounted(() => {
           @point-marker-click="handlePointMarkerClick"
         />
         <div class="overlay-container" :class="{ 'panel-hidden': isSearchPanelHidden }">
-          <button class="toggle-panel-btn" @click="togglePanel">
+          <button
+            class="toggle-panel-btn text-primary-500 hover:text-primary-600"
+            @click="togglePanel"
+          >
             <i :class="isSearchPanelHidden ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
           </button>
           <div
@@ -773,270 +875,404 @@ onUnmounted(() => {
           ></div>
         </div>
       </div>
-      <aside v-if="mode === 'plan'" class="plan-right-panel shadow-xs">
-        <div v-if="plan" class="contents">
-          <div class="flex flex-col m-8">
-            <editable-label
-              class="text-2xl max-w-128"
-              mode="input"
-              :label="plan?.title"
-              :disabled="!isCurrentUserHost"
-              placeholder="플랜 제목을 입력해주세요."
-              @save="(s) => _updatePlan({ title: s })"
-            />
-            <editable-label
-              class="text-sm max-w-128"
-              mode="input"
-              :label="plan?.description"
-              :disabled="!isCurrentUserHost"
-              placeholder="플랜 설명을 입력해주세요."
-              @save="(s) => _updatePlan({ description: s })"
-            />
-            <editable-label
-              class="text-sm max-w-128 min-h-32"
-              mode="textarea"
-              :label="plan?.memo"
-              :disabled="!isCurrentUserHost"
-              placeholder="플랜 메모를 입력해주세요."
-              @save="(s) => _updatePlan({ memo: s })"
-            />
 
-            <!-- 마법사 재실행 버튼 -->
-            <button
-              v-if="isCurrentUserHost"
-              @click="showWizardModal = true"
-              class="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors self-start"
+      <!-- 플랜 정보 영역 -->
+      <aside v-if="mode === 'plan'" class="plan-right-panel">
+        <div v-if="plan" class="contents min-h-full bg-transparent pointer-events-auto">
+          <!-- 플랜 기본 정보 영역 -->
+          <div class="pt-4 pr-4">
+            <div
+              class="bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-secondary-200 p-6"
             >
-              플랜 설정 마법사 실행
-            </button>
-          </div>
-          <div class="flex flex-col m-8 mt-16">
-            <!-- 인원수 카운터 -->
-            <label class="block text-sm font-medium text-gray-700 mb-2">인원수</label>
-            <div class="flex items-center space-x-3">
-              <button
-                :disabled="!isCurrentUserHost"
-                @click="decrementPeople"
-                class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
+              <div
+                class="flex items-center justify-between mb-4 cursor-pointer select-none hover:bg-secondary-50 -mx-2 px-2 py-2 rounded-lg transition-colors duration-200"
+                @click="togglePlanBasicInfo"
               >
-                -
-              </button>
-              <span class="min-w-[3rem] text-center text-lg font-medium">{{ cachedPeople }}</span>
-              <button
-                :disabled="!isCurrentUserHost"
-                @click="incrementPeople"
-                class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                +
-              </button>
-            </div>
-            <div class="flex items-center space-x-3">
-              <label for="theme">테마</label>
-              <select id="theme" v-model="selectedThemeId" :disabled="!isCurrentUserHost">
-                <option
-                  v-for="theme in planThemes"
-                  :key="theme.themeId"
-                  :value="theme.themeId"
-                  :selected="plan.themeId === theme.themeId"
+                <div class="flex items-center">
+                  <div
+                    class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center mr-3"
+                  >
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold text-primary-800">플랜 기본 정보</h3>
+                </div>
+                <div
+                  class="transition-transform duration-200"
+                  :class="{ 'rotate-180': !isPlanBasicInfoExpanded }"
                 >
-                  {{ theme.label }}
-                </option>
-              </select>
-            </div>
-
-            <!-- 여행 날짜 선택 -->
-            <div class="flex flex-col space-y-3 mt-4">
-              <div class="flex flex-col space-y-2">
-                <nullable-date-input
-                  label="시작 날짜를 지정해주세요."
-                  :model-value="plan.startDate"
-                  :max-date="plan.endDate"
-                  :disabled="!isCurrentUserHost"
-                  @update:model-value="(date) => _updatePlan({ startDate: date })"
-                  :default-date-generator="getDefaultStartDate"
-                />
-              </div>
-              <div class="flex flex-col space-y-2">
-                <nullable-date-input
-                  label="종료 날짜를 지정해주세요."
-                  :model-value="plan.endDate"
-                  :min-date="plan.startDate"
-                  :disabled="!isCurrentUserHost"
-                  @update:model-value="(date) => _updatePlan({ endDate: date })"
-                  :default-date-generator="getDefaultEndDate"
-                />
-              </div>
-            </div>
-
-            <!-- 참여자 -->
-            <div class="mt-6">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">참여자</h3>
-                <button
-                  v-if="isCurrentUserHost"
-                  @click="handleInviteParticipant"
-                  class="flex items-center justify-center w-8 h-8 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors duration-200 shadow-sm hover:shadow-md"
-                  title="참여자 초대"
-                >
-                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-5 h-5 text-secondary-600" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                       clip-rule="evenodd"
                     />
                   </svg>
-                </button>
+                </div>
               </div>
-              <div v-if="participants && participants.length > 0" class="space-y-3">
+
+              <div v-show="isPlanBasicInfoExpanded" class="space-y-4 transition-all duration-300">
+                <editable-label
+                  class="text-xl max-w-full"
+                  mode="input"
+                  :label="plan?.title"
+                  :disabled="!isCurrentUserHost"
+                  placeholder="플랜 제목을 입력해주세요."
+                  @save="(s) => _updatePlan({ title: s })"
+                />
+                <editable-label
+                  class="text-sm max-w-full"
+                  mode="input"
+                  :label="plan?.description"
+                  :disabled="!isCurrentUserHost"
+                  placeholder="플랜 설명을 입력해주세요."
+                  @save="(s) => _updatePlan({ description: s })"
+                />
+                <editable-label
+                  class="text-sm max-w-full min-h-32"
+                  mode="textarea"
+                  :label="plan?.memo"
+                  :disabled="!isCurrentUserHost"
+                  placeholder="플랜 메모를 입력해주세요."
+                  @save="(s) => _updatePlan({ memo: s })"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- 플랜 맞춤 정보 영역 -->
+          <div class="pt-4 pr-4">
+            <div
+              class="bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-secondary-200 p-6"
+            >
+              <div
+                class="flex items-center justify-between mb-4 cursor-pointer select-none hover:bg-secondary-50 -mx-2 px-2 py-2 rounded-lg transition-colors duration-200"
+                @click="togglePlanCustomInfo"
+              >
+                <div class="flex items-center">
+                  <div
+                    class="w-8 h-8 bg-accent-500 rounded-lg flex items-center justify-center mr-3"
+                  >
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold text-primary-800">플랜 맞춤 정보</h3>
+                </div>
                 <div
-                  v-for="participant in sortedParticipants"
-                  :key="participant.userId"
-                  class="flex flex-col bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200"
+                  class="transition-transform duration-200"
+                  :class="{ 'rotate-180': !isPlanCustomInfoExpanded }"
                 >
-                  <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center space-x-4">
-                      <!-- 프로필 아이콘 -->
-                      <mock-profile-icon :nickname="participant.nickname" :size="40" />
+                  <svg class="w-5 h-5 text-secondary-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </div>
 
-                      <div class="flex flex-col">
-                        <!-- 닉네임과 주최자/스태프 아이콘 -->
-                        <div class="flex items-center space-x-2 mb-1">
-                          <span class="font-medium text-gray-900 text-base">{{
-                            participant.nickname
-                          }}</span>
+              <div v-show="isPlanCustomInfoExpanded" class="space-y-6 transition-all duration-300">
+                <!-- 인원수 -->
+                <div class="flex items-center justify-between">
+                  <label class="text-sm font-semibold text-primary-800">인원수</label>
+                  <div class="w-40">
+                    <InputNumber
+                      v-model="cachedPeople"
+                      :disabled="!isCurrentUserHost"
+                      :min="1"
+                      :max="20"
+                      showButtons
+                      buttonLayout="horizontal"
+                      incrementButtonIcon="pi pi-plus"
+                      decrementButtonIcon="pi pi-minus"
+                      @input="throttledUpdatePeople"
+                      class="w-full people-counter"
+                      fluid
+                    />
+                  </div>
+                </div>
 
-                          <!-- 나 표시 -->
-                          <span
-                            v-if="participant.userId === tempUserId"
-                            class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
-                          >
-                            나
-                          </span>
+                <!-- 테마 -->
+                <div class="flex items-center justify-between">
+                  <label class="text-sm font-semibold text-primary-800">테마</label>
+                  <div class="w-40">
+                    <Select
+                      v-model="selectedThemeId"
+                      :options="planThemes"
+                      option-label="label"
+                      option-value="themeId"
+                      placeholder="테마 선택"
+                      :disabled="!isCurrentUserHost"
+                      class="w-full theme-select !text-sm"
+                      fluid
+                    />
+                  </div>
+                </div>
 
-                          <!-- 닉네임 편집 버튼 (나일 경우만) -->
-                          <button
-                            v-if="participant.userId === tempUserId"
-                            @click="startEditNickname(participant)"
-                            class="flex items-center justify-center w-5 h-5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                            title="닉네임 편집"
-                          >
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path
-                                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
-                              />
-                            </svg>
-                          </button>
-
-                          <!-- 주최자 아이콘 -->
-                          <div
-                            v-if="plan && plan.ownerId === participant.userId"
-                            class="flex flex-shrink-0 items-center justify-center w-5 h-5 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full shadow-sm"
-                            title="주최자"
-                          >
-                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path
-                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                              />
-                            </svg>
-                          </div>
-
-                          <!-- 스태프 아이콘 -->
-                          <div
-                            v-else-if="isParticipantStaff(participant)"
-                            class="flex flex-shrink-0 items-center justify-center w-5 h-5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-sm"
-                            title="스태프"
-                          >
-                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path
-                                fill-rule="evenodd"
-                                d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-
-                        <span class="text-sm text-gray-500 font-medium">
-                          {{ participant.role === 'owner' ? '관리자' : '멤버' }}
-                        </span>
-                      </div>
-                    </div>
-
-                    <!-- 주최자만 볼 수 있는 권한 편집 및 추방 버튼 -->
-                    <div v-if="isCurrentUserHost" class="flex items-center space-x-3">
-                      <!-- 권한 편집 버튼 -->
-                      <select
-                        :value="participant.role"
-                        @change="
-                          handleChangeParticipantRole(
-                            participant,
-                            ($event.target as HTMLSelectElement).value as 'owner' | 'member',
-                          )
+                <!-- 날짜 -->
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <label class="text-sm font-semibold text-primary-800">시작 날짜</label>
+                    <div class="w-40">
+                      <DatePicker
+                        :model-value="plan.startDate ? new Date(plan.startDate) : undefined"
+                        @update:model-value="
+                          (date) =>
+                            _updatePlan({
+                              startDate: Array.isArray(date)
+                                ? date[0] || undefined
+                                : date || undefined,
+                            })
                         "
-                        class="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                      >
-                        <option value="owner">관리자</option>
-                        <option value="member">멤버</option>
-                      </select>
-
-                      <!-- 추방 버튼 -->
-                      <button
-                        @click="handleRemoveParticipant(participant)"
-                        class="flex items-center justify-center w-9 h-9 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 group"
-                        title="추방"
-                      >
-                        <svg
-                          class="w-4 h-4 group-hover:scale-110 transition-transform"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                        :max-date="plan.endDate ? new Date(plan.endDate) : undefined"
+                        :disabled="!isCurrentUserHost"
+                        placeholder="시작 날짜"
+                        date-format="yy/mm/dd"
+                        class="w-full date-picker !text-sm"
+                        fluid
+                        showIcon
+                      />
                     </div>
                   </div>
 
-                  <!-- 닉네임 편집 툴팁 -->
-                  <div
-                    v-if="editingNickname === participant.userId"
-                    class="px-4 pb-4 border-t border-gray-100"
-                  >
-                    <div class="flex items-center space-x-2 pt-3">
-                      <input
-                        v-model="editNicknameValue"
-                        type="text"
-                        class="w-full nickname-edit-input flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors"
-                        placeholder="새로운 닉네임을 입력하세요"
-                        @keyup.enter="saveEditNickname"
-                        @keyup.escape="cancelEditNickname"
+                  <div class="flex items-center justify-between">
+                    <label class="text-sm font-semibold text-primary-800">종료 날짜</label>
+                    <div class="w-40">
+                      <DatePicker
+                        :model-value="plan.endDate ? new Date(plan.endDate) : undefined"
+                        @update:model-value="
+                          (date) =>
+                            _updatePlan({
+                              endDate: Array.isArray(date)
+                                ? date[0] || undefined
+                                : date || undefined,
+                            })
+                        "
+                        :min-date="plan.startDate ? new Date(plan.startDate) : undefined"
+                        :disabled="!isCurrentUserHost"
+                        placeholder="종료 날짜"
+                        date-format="yy/mm/dd"
+                        class="w-full date-picker !text-sm"
+                        fluid
+                        showIcon
                       />
-                      <button
-                        @click="saveEditNickname"
-                        class="flex-shrink-0 px-3 py-2 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-                      >
-                        저장
-                      </button>
-                      <button
-                        @click="cancelEditNickname"
-                        class="flex-shrink-0 px-3 py-2 text-sm bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                      >
-                        취소
-                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-else class="flex flex-col items-center justify-center py-8 text-gray-500">
-                <svg class="w-12 h-12 text-gray-300 mb-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"
-                  />
-                </svg>
-                <span class="text-center">참여자가 없습니다.</span>
+            </div>
+          </div>
+
+          <!-- 참여자 영역 -->
+          <div class="pt-4 pr-4">
+            <div
+              class="bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-secondary-200 p-6"
+            >
+              <div
+                class="flex items-center justify-between mb-4 cursor-pointer select-none hover:bg-secondary-50 -mx-2 px-2 py-2 rounded-lg transition-colors duration-200"
+                @click="toggleParticipants"
+              >
+                <div class="flex items-center">
+                  <div
+                    class="w-8 h-8 bg-secondary-600 rounded-lg flex items-center justify-center mr-3"
+                  >
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-semibold text-primary-800">참여자</h3>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                  <button
+                    v-if="isCurrentUserHost"
+                    @click.stop="handleInviteParticipant"
+                    class="flex items-center justify-center w-8 h-8 bg-accent-500 hover:bg-accent-600 text-white rounded-full transition-colors duration-200 shadow-sm hover:shadow-md"
+                    title="참여자 초대"
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <div
+                    class="transition-transform duration-200"
+                    :class="{ 'rotate-180': !isParticipantsExpanded }"
+                  >
+                    <svg class="w-5 h-5 text-secondary-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div v-show="isParticipantsExpanded" class="transition-all duration-300">
+                <div v-if="participants && participants.length > 0" class="space-y-3">
+                  <div
+                    v-for="participant in sortedParticipants"
+                    :key="participant.userId"
+                    class="bg-white rounded-xl border border-secondary-200 hover:border-secondary-300 transition-all duration-200 overflow-hidden"
+                  >
+                    <div class="p-4">
+                      <!-- 프로필 + 이름 + 배지 + 권한 편집 + 추방 버튼 -->
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3 flex-1 min-w-0">
+                          <!-- 프로필 아이콘 -->
+                          <mock-profile-icon :nickname="participant.nickname" :size="36" />
+
+                          <!-- 이름과 배지들 -->
+                          <div class="flex items-center space-x-2 flex-1 min-w-0">
+                            <h4 class="font-semibold text-primary-800 text-base truncate">
+                              {{ participant.nickname }}
+                            </h4>
+
+                            <!-- 나 표시 -->
+                            <span
+                              v-if="participant.userId === tempUserId"
+                              class="px-2 py-0.5 text-xs font-semibold bg-accent-100 text-accent-700 rounded-full border border-accent-200 flex-shrink-0"
+                            >
+                              나
+                            </span>
+
+                            <!-- 주최자 배지 -->
+                            <div
+                              v-if="plan && plan.ownerId === participant.userId"
+                              class="flex items-center justify-center w-5 h-5 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full shadow-sm flex-shrink-0"
+                              title="주최자"
+                            >
+                              <font-awesome-icon
+                                :icon="['fas', 'crown']"
+                                class="text-white text-xs"
+                              />
+                            </div>
+
+                            <!-- 스태프 배지 -->
+                            <div
+                              v-else-if="isParticipantStaff(participant)"
+                              class="flex items-center justify-center w-5 h-5 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-sm flex-shrink-0"
+                              title="스태프"
+                            >
+                              <font-awesome-icon
+                                :icon="['fas', 'shield-alt']"
+                                class="text-white text-xs"
+                              />
+                            </div>
+
+                            <!-- 닉네임 편집 버튼 (나일 경우만) -->
+                            <button
+                              v-if="participant.userId === tempUserId"
+                              @click="startEditNickname(participant)"
+                              class="flex items-center justify-center w-5 h-5 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 rounded-full transition-colors flex-shrink-0"
+                              title="닉네임 편집"
+                            >
+                              <font-awesome-icon :icon="['fas', 'edit']" class="text-xs" />
+                            </button>
+
+                            <!-- 권한 편집 버튼 (주최자만, 본인 제외) -->
+                            <button
+                              v-if="isCurrentUserHost && plan.ownerId !== participant.userId"
+                              @click="
+                                handleChangeParticipantRole(
+                                  participant,
+                                  participant.role === 'owner' ? 'member' : 'owner',
+                                )
+                              "
+                              class="flex items-center justify-center w-5 h-5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
+                              :title="
+                                participant.role === 'owner'
+                                  ? '관리자 권한 해제'
+                                  : '관리자 권한 부여'
+                              "
+                            >
+                              <font-awesome-icon :icon="['fas', 'user-cog']" class="text-xs" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- 추방 버튼 (주최자만, 본인 제외) -->
+                        <button
+                          v-if="isCurrentUserHost && plan.ownerId !== participant.userId"
+                          @click="handleRemoveParticipant(participant)"
+                          class="flex items-center justify-center w-7 h-7 text-accent-600 hover:text-accent-800 hover:bg-accent-50 rounded-lg transition-all duration-200 group border border-transparent hover:border-accent-200 flex-shrink-0"
+                          title="추방"
+                        >
+                          <font-awesome-icon
+                            :icon="['fas', 'times']"
+                            class="text-sm group-hover:scale-110 transition-transform"
+                          />
+                        </button>
+                      </div>
+
+                      <!-- 닉네임 편집 폼 -->
+                      <div
+                        v-if="editingNickname === participant.userId"
+                        class="mt-3 pt-3 border-t border-secondary-200"
+                      >
+                        <div class="flex items-center space-x-3">
+                          <div class="flex-1">
+                            <input
+                              v-model="editNicknameValue"
+                              type="text"
+                              class="w-full nickname-edit-input px-3 py-2 text-sm border border-secondary-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-colors"
+                              placeholder="새로운 닉네임을 입력하세요"
+                              @keyup.enter="saveEditNickname"
+                              @keyup.escape="cancelEditNickname"
+                            />
+                          </div>
+                          <button
+                            @click="saveEditNickname"
+                            class="flex items-center justify-center w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+                            title="저장"
+                          >
+                            <font-awesome-icon :icon="['fas', 'check']" class="text-sm" />
+                          </button>
+                          <button
+                            @click="cancelEditNickname"
+                            class="flex items-center justify-center w-8 h-8 bg-secondary-400 hover:bg-secondary-500 text-white rounded-lg transition-colors"
+                            title="취소"
+                          >
+                            <font-awesome-icon :icon="['fas', 'times']" class="text-sm" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-else
+                  class="flex flex-col items-center justify-center py-8 text-secondary-500"
+                >
+                  <svg
+                    class="w-12 h-12 text-secondary-300 mb-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"
+                    />
+                  </svg>
+                  <span class="text-center">참여자가 없습니다.</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1072,7 +1308,7 @@ onUnmounted(() => {
                 placeholder="시/도"
                 :disabled="isTourLoading || tourStore.isSidoLoading"
                 @change="handleSidoChange"
-                class="w-full select-custom"
+                class="w-full select-custom !text-sm"
                 showClear
               />
             </div>
@@ -1085,7 +1321,7 @@ onUnmounted(() => {
                 option-value="sigunguCode"
                 placeholder="시/군/구"
                 :disabled="isTourLoading || tourStore.isSigunguLoading || !selectedSido"
-                class="w-full select-custom"
+                class="w-full select-custom !text-sm"
                 showClear
               />
             </div>
@@ -1112,11 +1348,12 @@ onUnmounted(() => {
                 class="w-full py-3 px-4 text-sm bg-white border border-primary-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 placeholder-primary-400"
                 v-model="keyword"
                 placeholder="여행지 이름을 입력해주세요."
+                @keyup.enter="handleSearch"
               />
             </div>
             <button
               @click="handleSearch"
-              :disabled="isTourLoading || (!selectedSido && !keyword)"
+              :disabled="!isSearchEnabled"
               class="px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:outline-none min-w-[80px] flex items-center justify-center"
             >
               검색
@@ -1288,9 +1525,9 @@ onUnmounted(() => {
               <div v-if="isCurrentUserHost || isCurrentUserStaff" class="flex-shrink-0 ml-3">
                 <button
                   @click.stop="handleAddAttraction(item)"
-                  class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                  class="px-3 py-1.5 bg-secondary-600 hover:bg-secondary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200"
                 >
-                  추가
+                  <font-awesome-icon :icon="['fas', 'plus']" />
                 </button>
               </div>
             </div>
@@ -1322,12 +1559,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-:root {
-  --left-side-panel-width: 400px;
-  --right-side-panel-width: 400px;
-  --search-panel-width: 240px;
-}
-
 .search-plan-view-container {
   width: 100%;
   height: 100vh;
@@ -1349,11 +1580,11 @@ onUnmounted(() => {
 }
 
 .plan-left-panel {
-  width: var(--left-side-panel-width);
+  width: 320px;
   height: 100%;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
-  background-color: #f0f0f0;
   z-index: 20;
   transition: transform 0.3s ease;
 }
@@ -1366,14 +1597,27 @@ onUnmounted(() => {
 }
 
 .plan-right-panel {
-  width: var(--right-side-panel-width);
-  height: 100%;
-  background-color: #f0f0f0;
-  z-index: 20;
+  position: absolute;
+  top: var(--nav-height);
+  right: 0;
+  width: 360px;
+  height: calc(100% - var(--nav-height));
+  background: transparent;
+  z-index: 30;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.plan-right-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.plan-right-panel > * {
+  pointer-events: auto;
 }
 
 .search-view-container {
-  width: 100%;
+  flex: 1;
   height: 100%;
   position: relative;
   display: flex;
@@ -1453,5 +1697,102 @@ onUnmounted(() => {
   padding: 2rem;
   text-align: center;
   color: #666;
+}
+
+/* PrimeVue 컴포넌트 커스터마이징 */
+:deep(.people-counter) {
+  .p-inputnumber-input {
+    border-color: #e6e6cc;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.875rem; /* text-sm */
+  }
+
+  .p-inputnumber-input:focus {
+    border-color: #a8a868;
+    box-shadow: 0 0 0 2px #f0f0e0;
+    outline: none;
+  }
+
+  .p-inputnumber-buttons-horizontal .p-button {
+    background-color: #9d9d60;
+    border-color: #9d9d60;
+    color: white;
+  }
+
+  .p-inputnumber-buttons-horizontal .p-button:hover {
+    background-color: #7a7a40;
+    border-color: #7a7a40;
+  }
+
+  .p-inputnumber-buttons-horizontal .p-button:disabled {
+    background-color: #d4d4a6;
+    border-color: #d4d4a6;
+    opacity: 0.6;
+  }
+}
+
+:deep(.theme-select) {
+  .p-select-dropdown {
+    border-color: #e6e6cc;
+  }
+
+  .p-select-dropdown:focus {
+    border-color: #a8a868;
+    box-shadow: 0 0 0 2px #f0f0e0;
+    outline: none;
+  }
+
+  .p-select-dropdown:not(.p-disabled):hover {
+    border-color: #c0c080;
+  }
+}
+
+:deep(.date-picker) {
+  .p-datepicker-input {
+    font-size: 0.875rem; /* text-sm */
+    border-color: #e6e6cc;
+  }
+
+  .p-datepicker-input:focus {
+    border-color: #a8a868;
+    box-shadow: 0 0 0 2px #f0f0e0;
+    outline: none;
+  }
+
+  .p-datepicker-input:not(.p-disabled):hover {
+    border-color: #c0c080;
+  }
+
+  .p-datepicker-trigger-icon {
+    color: #9d9d60;
+  }
+}
+
+/* 참여자 권한 편집 Select 스타일링 */
+:deep(.participant-role-select) {
+  .p-select-dropdown {
+    border-color: #e6e6cc;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .p-select-dropdown:focus {
+    border-color: #a8a868;
+    box-shadow: 0 0 0 2px #f0f0e0;
+    outline: none;
+  }
+
+  .p-select-dropdown:not(.p-disabled):hover {
+    border-color: #c0c080;
+  }
+
+  .p-select-dropdown.p-disabled {
+    background-color: #faf6f0;
+    color: #9d7c56;
+    border-color: #ead5c1;
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
 }
 </style>
