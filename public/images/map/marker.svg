@@ -1,0 +1,27 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="48"
+  height="64"
+  viewBox="0 0 48 64"
+  role="img"
+  aria-labelledby="title"
+>
+  <title id="title">Map Marker Icon</title>
+  <!-- 외부 핀 형태 -->
+  <path
+    d="M24 0
+       C13.059 0 4 9.059 4 20
+       C4 37 24 64 24 64
+       C24 64 44 37 44 20
+       C44 9.059 34.941 0 24 0
+       Z"
+    fill="#d33a37"
+  />
+  <!-- 내부 원 -->
+  <circle
+    cx="24"
+    cy="20"
+    r="14"
+    fill="#FFFFFF"
+  />
+</svg>

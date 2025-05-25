@@ -17,7 +17,6 @@ mode 설정 여부에 따라 검색 모드 혹은 플랜 모드로 동작.
 import { useRoute, useRouter, type RouteRecordNameGeneric } from 'vue-router'
 import KakaoMap from '@/components/map/KakaoMap.vue'
 import AttractionInfoWindow from '@/components/map/AttractionInfoWindow.vue'
-import Pagination from '@/components/Pagination.vue'
 import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
 import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
@@ -61,6 +60,9 @@ import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
 import { throttle } from 'throttle-debounce'
 import { planThemes } from '@/constants/plan_themes'
 import NullableDateInput from '@/components/NullableDateInput.vue'
+import Select from 'primevue/select'
+import Paginator from 'primevue/paginator'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const route = useRoute()
 const router = useRouter()
@@ -88,7 +90,7 @@ const updateMobileMode = () => {
 const keyword = ref<string>('')
 
 // 검색 결과를 저장할 상태
-const searchResults = ref<AttractionItem[] | undefined>([])
+const searchResults = ref<AttractionItem[] | undefined>()
 
 // 투어 스토어 사용
 const tourStore = useTourStore()
@@ -160,8 +162,9 @@ const debugSearch = () => {
   handleAttractionFound(tourList.value)
 }
 
-const handlePageChange = (page: number) => {
-  currentPage.value = page
+const handlePageChange = (event: any) => {
+  // PrimeVue Paginator의 PageState는 first 속성을 0-based로 제공하므로 1-based로 변환
+  currentPage.value = Math.floor(event.first / event.rows) + 1
   fetchTourList()
 }
 
@@ -173,6 +176,28 @@ const handleRetry = () => {
 const handleAttractionFound = (attractions: AttractionItem[] | undefined) => {
   searchResults.value = attractions
   console.log('검색 결과:', attractions)
+}
+
+// 카테고리별 아이콘 매핑 함수
+const getCategoryIcon = (categoryCode: string | undefined): string => {
+  switch (categoryCode) {
+    case 'A01': // 자연
+      return 'fa-tree'
+    case 'A02': // 인문(문화/예술/역사)
+      return 'fa-landmark'
+    case 'A03': // 레포츠
+      return 'fa-dumbbell'
+    case 'A04': // 쇼핑
+      return 'fa-shopping-bag'
+    case 'A05': // 음식
+      return 'fa-utensils'
+    case 'B02': // 숙박
+      return 'fa-bed'
+    case 'C01': // 추천코스
+      return 'fa-route'
+    default:
+      return 'fa-map-marker-alt' // 기본 위치 아이콘
+  }
 }
 
 // 검색 패널 토글
@@ -738,7 +763,7 @@ onUnmounted(() => {
         />
         <div class="overlay-container" :class="{ 'panel-hidden': isSearchPanelHidden }">
           <button class="toggle-panel-btn" @click="togglePanel">
-            {{ isSearchPanelHidden ? '>' : '<' }}
+            <i :class="isSearchPanelHidden ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
           </button>
           <div
             v-show="!isMobile"
@@ -1020,112 +1045,268 @@ onUnmounted(() => {
     </div>
   </div>
   <Teleport v-if="canSearchCardTeleport" :to="searchCardTarget">
-    <div class="contents">
-      <div class="tour-search">
-        <div class="search-form">
-          <div class="area-form">
-            <div class="form-group">
-              <label for="sido">시/도</label>
-              <select
+    <div class="flex flex-col h-full">
+      <!-- 검색 옵션 영역 -->
+      <div class="flex-shrink-0 bg-white p-6 shadow-sm">
+        <!-- 지역 검색 섹션 -->
+        <i class="fa-brands fa-user"></i>
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-primary-800 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            지역별 검색
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2 use-primary-as-secondary">
+              <Select
                 id="sido"
                 v-model="selectedSido"
-                @change="handleSidoChange"
+                :options="tourStore.sidoList"
+                option-label="name"
+                option-value="areaCode"
+                placeholder="시/도"
                 :disabled="isTourLoading || tourStore.isSidoLoading"
-              >
-                <option value="">시/도 선택</option>
-                <option
-                  v-for="sido in tourStore.sidoList"
-                  :key="sido.areaCode"
-                  :value="sido.areaCode"
-                >
-                  {{ sido.name }}
-                </option>
-              </select>
+                @change="handleSidoChange"
+                class="w-full select-custom"
+                showClear
+              />
             </div>
-            <div class="form-group">
-              <label for="sigungu">시/군/구</label>
-              <select
+            <div class="space-y-2">
+              <Select
                 id="sigungu"
                 v-model="selectedSigungu"
+                :options="sigunguList"
+                option-label="name"
+                option-value="sigunguCode"
+                placeholder="시/군/구"
                 :disabled="isTourLoading || tourStore.isSigunguLoading || !selectedSido"
-              >
-                <option value="">시/군/구 선택</option>
-                <option
-                  v-for="sigungu in sigunguList"
-                  :key="sigungu.sigunguCode"
-                  :value="sigungu.sigunguCode"
-                >
-                  {{ sigungu.name }}
-                </option>
-              </select>
+                class="w-full select-custom"
+                showClear
+              />
             </div>
           </div>
-          <div class="keyword-form">
-            <input
-              type="text"
-              class="keyword-input"
-              v-model="keyword"
-              placeholder="검색어를 입력해주세요."
-            />
-            <button @click="debugSearch">test</button>
-            <button @click="handleSearch" :disabled="isTourLoading || (!selectedSido && !keyword)">
-              {{ isTourLoading ? '검색 중...' : '검색' }}
+        </div>
+
+        <!-- 키워드 검색 섹션 -->
+        <div class="mb-2">
+          <h3 class="text-lg font-semibold text-primary-800 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            키워드 검색
+          </h3>
+
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <input
+                type="text"
+                class="w-full py-3 px-4 text-sm bg-white border border-primary-300 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all duration-200 placeholder-primary-400"
+                v-model="keyword"
+                placeholder="여행지 이름을 입력해주세요."
+              />
+            </div>
+            <button
+              @click="handleSearch"
+              :disabled="isTourLoading || (!selectedSido && !keyword)"
+              class="px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-all duration-200 focus:ring-2 focus:ring-primary-200 focus:outline-none min-w-[80px] flex items-center justify-center"
+            >
+              검색
             </button>
           </div>
         </div>
       </div>
       <!-- 검색 결과 표시 -->
-      <div class="results-container">
-        <div v-if="searchResults === undefined">
-          <div>
-            <span>검색에 실패하였습니다.</span>
-            <button @click="handleRetry">재시도</button>
+      <div class="results-container flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- 검색 실패 상태 -->
+        <div
+          v-if="searchResults === null"
+          class="flex flex-col items-center justify-center py-8 px-4"
+        >
+          <div class="bg-accent-50 border border-accent-200 rounded-lg p-6 text-center max-w-sm">
+            <svg
+              class="w-12 h-12 text-accent-400 mx-auto mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
+            <h3 class="text-lg font-semibold text-accent-800 mb-2">검색에 실패하였습니다</h3>
+            <p class="text-accent-600 mb-4">다시 시도해주세요.</p>
+            <button
+              @click="handleRetry"
+              class="px-4 py-2 bg-accent-500 hover:bg-accent-600 text-white rounded-lg transition-colors duration-200 font-medium"
+            >
+              재시도
+            </button>
           </div>
         </div>
-        <div v-else-if="searchResults.length === 0" class="no-results">
-          검색 결과가 없습니다.<br />지역을 선택하고 검색해 보세요.
+        <!-- 검색 실패 상태 -->
+        <div
+          v-if="searchResults === undefined"
+          class="flex flex-col items-center justify-center py-8 px-4"
+        >
+          <div
+            class="bg-secondary-50 border border-secondary-200 rounded-lg p-6 text-center max-w-sm"
+          >
+            <svg
+              class="w-12 h-12 text-secondary-400 mx-auto mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <h3 class="text-lg font-semibold text-secondary-800 mb-2"></h3>
+            <p class="text-secondary-600">지역을 선택하고 검색해 보세요.</p>
+          </div>
         </div>
-        <div v-else-if="isTourLoading" class="loading">로딩 중...</div>
-        <ul v-else class="search-results">
-          <li
+
+        <!-- 검색 결과 없음 상태 -->
+        <div
+          v-else-if="searchResults.length === 0"
+          class="flex flex-col items-center justify-center py-8 px-4"
+        >
+          <div
+            class="bg-secondary-50 border border-secondary-200 rounded-lg p-6 text-center max-w-sm"
+          >
+            <svg
+              class="w-12 h-12 text-secondary-400 mx-auto mb-3"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <h3 class="text-lg font-semibold text-secondary-800 mb-2">검색 결과가 없어요.</h3>
+            <p class="text-secondary-600">다른 지역이나 키워드로 검색해 보세요.</p>
+          </div>
+        </div>
+
+        <!-- 로딩 상태 -->
+        <div v-else-if="isTourLoading" class="flex flex-col items-center justify-center py-8">
+          <div class="bg-primary-50 border border-primary-200 rounded-lg p-6 text-center">
+            <svg
+              class="w-8 h-8 text-primary-600 mx-auto mb-3 animate-spin"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            <p class="text-primary-700 font-medium">로딩 중...</p>
+          </div>
+        </div>
+
+        <!-- 검색 결과 목록 -->
+        <div v-else class="bg-white rounded-lg overflow-hidden divide-y divide-secondary-200">
+          <div
             v-for="item in searchResults"
             :key="item.contentId"
-            class="result-item"
+            class="hover:bg-secondary-100 transition-all duration-200 cursor-pointer group"
             :class="{
-              'result-item-selected':
+              'bg-primary-100':
                 selectedAttraction && selectedAttraction.contentId === item.contentId,
             }"
             @click="handleResultItemClick(item)"
             @mouseenter="handleResultItemMouseEnter(item)"
             @mouseleave="handleResultItemMouseLeave"
           >
-            <div class="result-image">
-              <img v-if="item.firstImageUrl" :src="item.firstImageUrl" :alt="item.title" />
-              <div v-else class="no-image">이미지 없음</div>
+            <div class="flex items-center p-4">
+              <!-- 이미지 영역 -->
+              <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-secondary-100 mr-4">
+                <img
+                  v-if="item.firstImageUrl"
+                  :src="item.firstImageUrl"
+                  :alt="item.title"
+                  class="w-full h-full object-cover"
+                />
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center text-secondary-400"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- 정보 영역 -->
+              <div class="flex-1 min-w-0">
+                <h3
+                  class="text-base font-semibold text-primary-800 truncate group-hover:text-primary-900 transition-colors flex items-center"
+                >
+                  <font-awesome-icon
+                    :icon="getCategoryIcon(item.category1)"
+                    class="w-4 h-4 mr-2 text-primary-600 flex-shrink-0"
+                  />
+                  {{ item.title }}
+                </h3>
+                <p class="text-sm text-secondary-700 mt-1 line-clamp-2">
+                  {{ item.address1 }} {{ item.address2 }}
+                </p>
+                <p v-if="item.telephone" class="text-xs text-secondary-500 mt-1">
+                  {{ item.telephone }}
+                </p>
+              </div>
+
+              <!-- 추가 버튼 -->
+              <div v-if="isCurrentUserHost || isCurrentUserStaff" class="flex-shrink-0 ml-3">
+                <button
+                  @click.stop="handleAddAttraction(item)"
+                  class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                >
+                  추가
+                </button>
+              </div>
             </div>
-            <div class="result-info">
-              <h3>{{ item.title }}</h3>
-              <p class="address">{{ item.address1 }} {{ item.address2 }}</p>
-              <p v-if="item.telephone" class="tel">{{ item.telephone }}</p>
-            </div>
-            <button
-              v-if="isCurrentUserHost || isCurrentUserStaff"
-              @click.stop="handleAddAttraction(item)"
-            >
-              추가
-            </button>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
-      <Pagination
-        class="pagination"
-        v-if="searchResults && searchResults.length > 0"
-        :current-page="currentPage"
-        :page-size="pageSize"
-        :total-count="totalCount"
-        :loading="isTourLoading"
-        @page-change="handlePageChange"
-      />
+      <!-- 페이지네이션 -->
+      <div class="flex-shrink-0">
+        <Paginator
+          v-if="searchResults && searchResults.length > 0"
+          :first="(currentPage - 1) * pageSize"
+          :rows="pageSize"
+          :totalRecords="totalCount"
+          @page="handlePageChange"
+        />
+      </div>
     </div>
   </Teleport>
 
@@ -1260,83 +1441,6 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.results-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.no-results {
-  text-align: center;
-  color: #666;
-  margin-top: 2rem;
-}
-
-.search-results {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.result-item {
-  display: flex;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.result-item:hover {
-  background-color: #f5f5f5;
-}
-
-.result-item-selected {
-  background-color: #e8f0fe;
-  border-left: 3px solid #4285f4;
-  padding-left: 8px;
-}
-
-.result-image {
-  width: 100px;
-  height: 80px;
-  overflow: hidden;
-  background-color: #f0f0f0;
-  margin-right: 1rem;
-  flex-shrink: 0;
-}
-
-.result-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.no-image {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  font-size: 0.8rem;
-}
-
-.result-info {
-  flex: 1;
-}
-
-.result-info h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1rem;
-}
-
-.result-info .address,
-.result-info .tel {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
-  color: #666;
-}
-
 #map {
   position: absolute;
   top: 0;
@@ -1345,76 +1449,9 @@ onUnmounted(() => {
   right: 0;
 }
 
-/* TourSearch 스타일 통합 */
-.tour-search {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.search-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: #f5f5f5;
-  border-radius: 0.5rem;
-}
-
-.area-form {
-  display: flex;
-  gap: 1rem;
-}
-
-.keyword-form {
-  display: flex;
-  gap: 1rem;
-}
-
-.keyword-input {
-  flex-grow: 1;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 100px;
-  gap: 0.5rem;
-}
-
-.tour-search select,
-.tour-search button {
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid #ccc;
-}
-
-.tour-search button {
-  align-self: flex-end;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  margin-top: auto;
-}
-
-.tour-search button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
 .loading {
   padding: 2rem;
   text-align: center;
   color: #666;
-}
-
-.pagination {
-  padding: 0 2rem 2rem;
 }
 </style>

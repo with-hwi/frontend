@@ -24,9 +24,9 @@ const hovered = ref(false)
 
 const markerImage = computed(() => {
   if (props.highlighted || hovered.value) {
-    return '/images/marker_ordered_hover.png'
+    return '/images/map/marker_ordered_hover.svg'
   }
-  return '/images/marker_ordered.png'
+  return '/images/map/marker_ordered.svg'
 })
 </script>
 
