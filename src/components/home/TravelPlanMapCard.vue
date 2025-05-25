@@ -15,11 +15,11 @@
       </div>
 
       <!-- 지도 이미지와 마커들 -->
-      <div class="relative w-full h-80 rounded-xl overflow-hidden">
+      <div class="relative rounded-xl overflow-hidden">
         <img
           src="/images/home/plan_map_example.png"
           alt="여행 지도"
-          class="w-full h-full object-cover"
+          class="aspect-16/10 h-80 object-cover"
         />
 
         <!-- 여행 경로 라인 (SVG) -->
