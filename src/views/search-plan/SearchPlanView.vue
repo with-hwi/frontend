@@ -1604,6 +1604,7 @@ onUnmounted(() => {
   <!-- 플랜 마법사 모달 -->
   <PlanWizardModal
     v-model="showWizardModal"
+    :plan-id="planId!"
     :initial-description="plan?.description"
     :initial-people="plan?.people"
     :initial-theme-id="plan?.themeId"
