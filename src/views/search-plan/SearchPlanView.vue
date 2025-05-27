@@ -57,6 +57,7 @@ import {
   updatePlan,
   updatePoint,
   createInviteCode,
+  getRecommendation,
 } from '@/services/planService'
 import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
 import { throttle } from 'throttle-debounce'
@@ -189,7 +190,12 @@ const handleAttractionFound = (attractions: AttractionItem[] | undefined) => {
 
 // 검색 가능 조건 충족 여부
 const isSearchEnabled = computed(() => {
-  return !(isTourLoading.value || (!selectedSido.value && !keyword.value))
+  return !(isLoading.value || (!selectedSido.value && !keyword.value))
+})
+
+// 전체 로딩 상태 (일반 검색 + AI 추천)
+const isLoading = computed(() => {
+  return isTourLoading.value || isAiRecommending.value
 })
 
 // 카테고리별 아이콘 매핑 함수
@@ -789,6 +795,61 @@ const sortedParticipants = computed(() => {
 })
 
 //
+// === AI 도우미 관련 시작 ===
+//
+
+// AI 도우미 상태
+const isAiRecommending = ref(false)
+const aiTooltipMessage = ref('딱 맞는 여행지를\n추천해드릴게요.')
+const aiTooltipTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
+
+// AI 추천 가능 여부 (플랜 모드에서만 가능)
+const canUseAiRecommendation = computed(() => {
+  return mode.value === 'plan' && planId.value !== null && !isAiRecommending.value
+})
+
+// AI 추천 실행
+const handleAiRecommendation = async () => {
+  if (!canUseAiRecommendation.value || !planId.value) {
+    return
+  }
+
+  try {
+    isAiRecommending.value = true
+    aiTooltipMessage.value = '추천 중이에요...'
+
+    const response = await getRecommendation(planId.value)
+
+    // 추천 결과를 검색 결과에 표시
+    searchResults.value = response.data
+
+    // 완료 메시지 표시
+    aiTooltipMessage.value = '추천이 완료되었어요!'
+
+    // 2초 후 원래 메시지로 복원
+    aiTooltipTimeout.value = setTimeout(() => {
+      aiTooltipMessage.value = '딱 맞는 여행지를 추천해드릴게요'
+      aiTooltipTimeout.value = null
+    }, 2000)
+  } catch (error) {
+    console.error('AI 추천 실패:', error)
+    aiTooltipMessage.value = '추천에 실패했어요. 다시 시도해주세요.'
+
+    // 3초 후 원래 메시지로 복원
+    aiTooltipTimeout.value = setTimeout(() => {
+      aiTooltipMessage.value = '딱 맞는 여행지를 추천해드릴게요'
+      aiTooltipTimeout.value = null
+    }, 3000)
+  } finally {
+    isAiRecommending.value = false
+  }
+}
+
+//
+// === AI 도우미 관련 끝 ===
+//
+
+//
 // === 플랜 모드 관련 끝 ===
 //
 
@@ -807,6 +868,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', updateMobileMode)
+
+  // AI 툴팁 타이머 정리
+  if (aiTooltipTimeout.value) {
+    clearTimeout(aiTooltipTimeout.value)
+  }
 })
 </script>
 
@@ -1360,7 +1426,7 @@ onUnmounted(() => {
                 option-label="name"
                 option-value="areaCode"
                 placeholder="시/도"
-                :disabled="isTourLoading || tourStore.isSidoLoading"
+                :disabled="isLoading || tourStore.isSidoLoading"
                 @change="handleSidoChange"
                 class="w-full select-custom !text-sm"
                 showClear
@@ -1374,7 +1440,7 @@ onUnmounted(() => {
                 option-label="name"
                 option-value="sigunguCode"
                 placeholder="시/군/구"
-                :disabled="isTourLoading || tourStore.isSigunguLoading || !selectedSido"
+                :disabled="isLoading || tourStore.isSigunguLoading || !selectedSido"
                 class="w-full select-custom !text-sm"
                 showClear
               />
@@ -1499,7 +1565,7 @@ onUnmounted(() => {
         </div>
 
         <!-- 로딩 상태 -->
-        <div v-else-if="isTourLoading" class="flex flex-col items-center justify-center py-8">
+        <div v-else-if="isLoading" class="flex flex-col items-center justify-center py-8">
           <div class="bg-primary-50 border border-primary-200 rounded-lg p-6 text-center">
             <svg
               class="w-8 h-8 text-primary-600 mx-auto mb-3 animate-spin"
@@ -1514,7 +1580,9 @@ onUnmounted(() => {
                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
               />
             </svg>
-            <p class="text-primary-700 font-medium">로딩 중...</p>
+            <p class="text-primary-700 font-medium">
+              {{ isAiRecommending ? 'AI가 여행지를 추천하고 있어요...' : '로딩 중...' }}
+            </p>
           </div>
         </div>
 
@@ -1688,6 +1756,40 @@ onUnmounted(() => {
       </div>
     </div>
   </Popover>
+
+  <!-- AI 도우미 아이콘 -->
+  <div
+    v-tooltip.left="{
+      value: aiTooltipMessage,
+      showDelay: 300,
+      hideDelay: 100,
+      pt: {
+        text: '!text-sm',
+      },
+    }"
+    class="floating-symbol"
+    :class="{
+      'floating-symbol-disabled': !canUseAiRecommendation,
+      'floating-symbol-recommending': isAiRecommending,
+    }"
+    @click="handleAiRecommendation"
+  >
+    <!-- 로딩 애니메이션 (배경 원 주변) -->
+    <div v-if="isAiRecommending" class="ai-background-animation">
+      <div class="ai-pulse-ring"></div>
+      <div class="ai-pulse-ring ai-pulse-ring-delay-1"></div>
+      <div class="ai-pulse-ring ai-pulse-ring-delay-2"></div>
+    </div>
+
+    <!-- AI 아이콘 -->
+    <div class="relative">
+      <img
+        src="/images/trabuddy/symbol.png"
+        alt="Trabuddy Symbol"
+        class="w-12 h-12 object-contain transition-all duration-300"
+      />
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -1738,6 +1840,7 @@ onUnmounted(() => {
   z-index: 30;
   overflow-y: auto;
   pointer-events: none;
+  padding-bottom: 120px; /* 플로팅 아이콘 공간 확보 */
 }
 
 .plan-right-panel::-webkit-scrollbar {
@@ -1925,6 +2028,110 @@ onUnmounted(() => {
     border-color: #ead5c1;
     cursor: not-allowed;
     opacity: 0.8;
+  }
+}
+
+/* 고정된 플로팅 심볼 아이콘 스타일 */
+.floating-symbol {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 248, 240, 0.95));
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  box-shadow:
+    0 4px 12px rgba(168, 168, 104, 0.15),
+    0 2px 4px rgba(168, 168, 104, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(168, 168, 104, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.floating-symbol:hover:not(.floating-symbol-disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 20px rgba(168, 168, 104, 0.25),
+    0 4px 8px rgba(168, 168, 104, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(168, 168, 104, 0.3);
+}
+
+.floating-symbol:active:not(.floating-symbol-disabled) {
+  transform: translateY(-1px);
+  transition-duration: 0.1s;
+}
+
+.floating-symbol img {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* 비활성화된 상태 */
+.floating-symbol.floating-symbol-disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* 추천 중 상태 */
+.floating-symbol.floating-symbol-recommending {
+  cursor: wait;
+}
+
+/* PrimeVue 툴팁 커스터마이징 */
+:deep(.p-tooltip) {
+  background: rgba(168, 168, 104, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.p-tooltip .p-tooltip-arrow) {
+  border-left-color: rgba(168, 168, 104, 0.95);
+}
+
+/* AI 배경 로딩 애니메이션 */
+.ai-background-animation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ai-pulse-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(168, 168, 104, 0.4);
+  border-radius: 50%;
+  animation: ai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.ai-pulse-ring-delay-1 {
+  animation-delay: 0.4s;
+}
+
+.ai-pulse-ring-delay-2 {
+  animation-delay: 0.8s;
+}
+
+@keyframes ai-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
   }
 }
 </style>

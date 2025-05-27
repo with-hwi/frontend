@@ -162,3 +162,5 @@ export const getInviteInfo = (inviteCode: string) =>
   }))
 
 export const acceptInvite = (inviteCode: string) => planApi.acceptInvite(inviteCode)
+
+export const getRecommendation = (planId: number) => planApi.getRecommendation(planId)

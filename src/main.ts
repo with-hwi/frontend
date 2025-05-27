@@ -4,6 +4,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
 import TrabuddyPreset from './theme/trabuddy-preset'
 
 import App from './App.vue'
@@ -40,6 +41,7 @@ async function prepareApp() {
     },
   })
 
+  app.directive('tooltip', Tooltip)
   app.component('font-awesome-icon', FontAwesomeIcon)
 
   app.mount('#app')

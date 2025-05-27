@@ -192,6 +192,11 @@ export const handlers = [
     )
   }),
 
+  http.get(`*/api/v1/plans/:planId/recommendation`, async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    return HttpResponse.json(mockRecommendations)
+  }),
+
   http.get(`${API_BASE_URL}/needAuth`, () => {
     return HttpResponse.json(
       {
@@ -471,3 +476,5 @@ const mockGetPointDtos = [
     attraction: mockAttractions[5],
   },
 ] as GetPointsResDto[]
+
+const mockRecommendations = [...mockAttractions]

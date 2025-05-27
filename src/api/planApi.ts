@@ -99,6 +99,14 @@ const acceptInvite = (inviteCode: string) =>
     inviteCode,
   })
 
+// TODO: 추후 별도 DTO 분리
+const getRecommendation = (planId: number) =>
+  axios.get<AttractionItem[]>(`${API_BASE_URL}/api/v1/plans/${planId}/recommendation`, {
+    params: {
+      ...defaultParams,
+    },
+  })
+
 export default {
   getPlan,
   createPlan,
@@ -115,4 +123,5 @@ export default {
   createInviteCode,
   getInviteInfo,
   acceptInvite,
+  getRecommendation,
 }
