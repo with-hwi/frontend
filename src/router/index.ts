@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SearchPlanView from '@/views/search-plan/SearchPlanView.vue'
-import MyPageView from '@/views/MyPageView.vue'
 import { useAuthStore } from '@/stores/auth'
 import { retrieveUserInfoIfPossible } from '@/services/userService'
 const router = createRouter({
@@ -21,11 +20,6 @@ const router = createRouter({
       path: '/plan/:planId',
       name: 'plan',
       component: SearchPlanView,
-    },
-    {
-      path: '/my-page',
-      name: 'my-page',
-      component: MyPageView,
     },
     {
       path: '/invite/:inviteCode',
