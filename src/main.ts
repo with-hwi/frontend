@@ -17,6 +17,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 library.add(fas)
 
+// Firebase
+import './firebase'
+
 async function prepareApp() {
   if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API) {
     const { worker } = await import('./mocks/browser')

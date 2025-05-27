@@ -23,6 +23,7 @@
     "@types/js-cookie": "^3.0.6",
     "@vueuse/core": "^13.2.0",
     "axios": "^1.9.0",
+    "firebase": "^11.8.1",
     "js-cookie": "^3.0.5",
     "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.3.0",
