@@ -32,3 +32,5 @@ export interface AttractionItem {
   longitude?: string
   latitude?: string
 }
+
+export type RecommendationItem = AttractionItem
