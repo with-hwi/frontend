@@ -21,6 +21,14 @@ const router = createRouter({
       name: 'plan',
       component: SearchPlanView,
     },
+    {
+      path: '/invite/:inviteCode',
+      name: 'invite',
+      redirect: (to) => ({
+        path: '/',
+        query: { inviteCode: to.params.inviteCode },
+      }),
+    },
   ],
 })
 

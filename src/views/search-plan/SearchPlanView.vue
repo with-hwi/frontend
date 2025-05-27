@@ -42,6 +42,7 @@ import {
   type PlanItem,
   type PointItem,
   type VisibilityType,
+  type InviteCodeItem,
 } from '@/types/plan'
 import NumberedMarker from '@/components/NumberedMarker.vue'
 import {
@@ -55,6 +56,7 @@ import {
   updateParticipant,
   updatePlan,
   updatePoint,
+  createInviteCode,
 } from '@/services/planService'
 import { deserializeDate, getDateOnly, serializeDate } from '@/utils/date'
 import { throttle } from 'throttle-debounce'
@@ -64,6 +66,7 @@ import Select from 'primevue/select'
 import Paginator from 'primevue/paginator'
 import InputNumber from 'primevue/inputnumber'
 import DatePicker from 'primevue/datepicker'
+import Popover from 'primevue/popover'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const route = useRoute()
@@ -654,9 +657,65 @@ const isParticipantStaff = (participant: ParticipantItem) => {
   return participant.role === 'owner'
 }
 
-// 참여자 초대 (구현 예정)
-const handleInviteParticipant = () => {
-  alert('참여자 초대 기능은 구현 예정입니다.')
+// 초대 링크 관련 상태
+const inviteCode = ref<InviteCodeItem | null>(null)
+const isCreatingInviteCode = ref(false)
+const invitePopover = ref()
+
+// 초대 링크 URL computed
+const inviteUrl = computed(() => {
+  if (!inviteCode.value) return ''
+  return `${window.location.origin}/invite/${inviteCode.value.inviteCode}`
+})
+
+// 초대 링크 Popover 토글
+const toggleInvitePopover = (event: Event) => {
+  invitePopover.value?.toggle(event)
+}
+
+// 참여자 초대 버튼 클릭 (Popover 먼저 열기)
+const handleInviteParticipant = (event: Event) => {
+  // 먼저 Popover를 연다
+  toggleInvitePopover(event)
+  // 초대 코드 초기화
+  inviteCode.value = null
+}
+
+// 초대 링크 생성
+const generateInviteLink = async () => {
+  if (planId.value === null || planId.value === undefined) {
+    return
+  }
+
+  try {
+    isCreatingInviteCode.value = true
+    inviteCode.value = await createInviteCode(planId.value)
+  } catch (error) {
+    console.error('초대 링크 생성 실패:', error)
+    alert('초대 링크 생성에 실패했습니다. 다시 시도해주세요.')
+  } finally {
+    isCreatingInviteCode.value = false
+  }
+}
+
+// 초대 링크 복사
+const copyInviteLink = async () => {
+  if (!inviteUrl.value) return
+
+  try {
+    await navigator.clipboard.writeText(inviteUrl.value)
+    // alert('초대 링크가 클립보드에 복사되었습니다!')
+  } catch (error) {
+    console.error('클립보드 복사 실패:', error)
+    // 클립보드 API가 지원되지 않는 경우 fallback
+    const textArea = document.createElement('textarea')
+    textArea.value = inviteUrl.value
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    alert('초대 링크가 클립보드에 복사되었습니다!')
+  }
 }
 
 // 닉네임 편집 상태 관리
@@ -1097,19 +1156,14 @@ onUnmounted(() => {
                 </div>
 
                 <div class="flex items-center space-x-2">
+                  <!-- 초대 링크 생성 버튼 -->
                   <button
                     v-if="isCurrentUserHost"
                     @click.stop="handleInviteParticipant"
-                    class="flex items-center justify-center w-8 h-8 bg-accent-500 hover:bg-accent-600 text-white rounded-full transition-colors duration-200 shadow-sm hover:shadow-md"
-                    title="참여자 초대"
+                    class="flex items-center justify-center w-8 h-8 text-accent-600 hover:text-accent-700 hover:bg-accent-50 rounded-full transition-colors duration-200"
+                    title="초대 링크 생성"
                   >
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
+                    <font-awesome-icon :icon="['fas', 'link']" class="text-sm" />
                   </button>
                   <div
                     class="transition-transform duration-200"
@@ -1550,12 +1604,90 @@ onUnmounted(() => {
   <!-- 플랜 마법사 모달 -->
   <PlanWizardModal
     v-model="showWizardModal"
+    :plan-id="planId!"
     :initial-description="plan?.description"
     :initial-people="plan?.people"
     :initial-theme-id="plan?.themeId"
     @complete="handleWizardComplete"
     @never-show-again="handleWizardNeverShow"
   />
+
+  <!-- 초대 링크 Popover -->
+  <Popover ref="invitePopover" class="w-80">
+    <div class="p-4">
+      <div class="mb-4">
+        <h3 class="text-lg font-semibold text-primary-800 mb-2 flex items-center">
+          <font-awesome-icon :icon="['fas', 'link']" class="text-primary-600 mr-2" />
+          초대 링크
+        </h3>
+        <p class="text-sm text-secondary-600">
+          이 링크를 공유하여 다른 사람들을 플랜에 초대하세요.
+        </p>
+      </div>
+
+      <!-- 로딩 중 상태 -->
+      <div v-if="isCreatingInviteCode" class="flex flex-col items-center justify-center py-8">
+        <font-awesome-icon
+          :icon="['fas', 'spinner']"
+          class="text-2xl text-primary-600 animate-spin mb-3"
+        />
+        <p class="text-sm text-secondary-600">초대 링크를 생성하고 있습니다...</p>
+      </div>
+
+      <!-- 초대 링크가 없을 때 - 생성 버튼 -->
+      <div v-else-if="!inviteCode" class="text-center py-4">
+        <button
+          @click="generateInviteLink"
+          class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center mx-auto"
+        >
+          <font-awesome-icon :icon="['fas', 'plus']" class="mr-2" />
+          초대 링크 생성
+        </button>
+      </div>
+
+      <!-- 초대 링크 생성 완료 -->
+      <div v-else class="space-y-4">
+        <!-- 초대 링크 표시 -->
+        <div class="bg-secondary-50 border border-secondary-200 rounded-lg p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 min-w-0 mr-3">
+              <p class="text-xs text-secondary-600 break-all">
+                {{ inviteUrl }}
+              </p>
+            </div>
+            <button
+              @click="copyInviteLink"
+              class="flex items-center justify-center w-8 h-8 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex-shrink-0"
+              title="링크 복사"
+            >
+              <font-awesome-icon :icon="['fas', 'copy']" class="text-sm" />
+            </button>
+          </div>
+        </div>
+
+        <!-- 유효기간 표시 -->
+        <div class="bg-accent-50 border border-accent-200 rounded-lg p-3">
+          <div class="flex items-center">
+            <font-awesome-icon :icon="['fas', 'clock']" class="text-accent-600 mr-2" />
+            <div>
+              <p class="text-sm font-medium text-accent-800">유효기간</p>
+              <p class="text-xs text-accent-600">
+                {{
+                  inviteCode.validUntil.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                }}까지
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Popover>
 </template>
 
 <style scoped>

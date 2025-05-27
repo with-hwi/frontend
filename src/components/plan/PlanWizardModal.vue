@@ -12,13 +12,17 @@ import {
   faStar,
   faMapLocationDot,
   faCheck,
+  faCopy,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons'
+import { createInviteCode } from '@/services/planService'
 
 interface Props {
   modelValue: boolean
   initialDescription?: string
   initialPeople?: number
   initialThemeId?: number | null
+  planId: number
 }
 
 interface Emits {
@@ -46,6 +50,15 @@ const wizardData = ref({
   people: props.initialPeople,
   themeId: props.initialThemeId ?? 0,
 })
+
+// 초대 링크 관련 상태
+const inviteLink = ref<{
+  inviteCode: string
+  validUntil: Date
+  fullUrl: string
+} | null>(null)
+const isCreatingInvite = ref(false)
+const inviteCopied = ref(false)
 
 // props 변경 감지
 watch(
@@ -190,6 +203,61 @@ const getConfettiStyle = (index: number) => {
     right: isLeft ? 'auto' : `${randomX}%`,
   }
 }
+
+// 초대 링크 생성 함수
+const generateInviteLink = async () => {
+  isCreatingInvite.value = true
+  try {
+    const result = await createInviteCode(props.planId)
+    const baseUrl = window.location.origin
+    inviteLink.value = {
+      inviteCode: result.inviteCode,
+      validUntil: result.validUntil,
+      fullUrl: `${baseUrl}/invite/${result.inviteCode}`,
+    }
+  } catch (error) {
+    console.error('초대 링크 생성 실패:', error)
+    // TODO: 에러 처리 (토스트 등)
+  } finally {
+    isCreatingInvite.value = false
+  }
+}
+
+// 링크 복사 함수
+const copyInviteLink = async () => {
+  if (!inviteLink.value) return
+
+  try {
+    await navigator.clipboard.writeText(inviteLink.value.fullUrl)
+    inviteCopied.value = true
+    setTimeout(() => {
+      inviteCopied.value = false
+    }, 2000)
+  } catch (error) {
+    console.error('복사 실패:', error)
+    // 폴백: 텍스트 선택
+    const textArea = document.createElement('textarea')
+    textArea.value = inviteLink.value.fullUrl
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    inviteCopied.value = true
+    setTimeout(() => {
+      inviteCopied.value = false
+    }, 2000)
+  }
+}
+
+// 유효기간 포맷팅
+const formatValidUntil = (date: Date) =>
+  date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 </script>
 
 <template>
@@ -422,20 +490,64 @@ const getConfettiStyle = (index: number) => {
             </div>
 
             <div class="space-y-4">
+              <!-- 초대 링크 생성 버튼 -->
               <button
-                disabled
-                class="w-full py-4 px-6 bg-secondary-200 text-secondary-500 rounded-2xl cursor-not-allowed flex items-center justify-center space-x-3 font-semibold transition-all"
-                title="준비 중인 기능입니다"
+                v-if="!inviteLink"
+                @click="generateInviteLink"
+                :disabled="isCreatingInvite"
+                class="w-full py-4 px-6 rounded-2xl flex items-center justify-center space-x-3 font-semibold transition-all bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:shadow-lg disabled:bg-secondary-200 disabled:text-secondary-500 disabled:cursor-not-allowed"
               >
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fill-rule="evenodd"
-                    d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                <span>초대 링크 생성하기</span>
+                <FontAwesomeIcon
+                  :icon="isCreatingInvite ? faSpinner : faUserPlus"
+                  :class="{ 'animate-spin': isCreatingInvite }"
+                  class="text-lg"
+                />
+                <span>{{ isCreatingInvite ? '링크 생성 중...' : '초대 링크 생성하기' }}</span>
               </button>
+
+              <!-- 생성된 초대 링크 표시 -->
+              <div v-if="inviteLink" class="space-y-4">
+                <!-- 링크 박스 -->
+                <div class="bg-white border-2 border-primary-200 rounded-xl p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1 min-w-0">
+                      <p class="text-xs text-secondary-600 font-mono break-all">
+                        {{ inviteLink.fullUrl }}
+                      </p>
+                    </div>
+                    <button
+                      @click="copyInviteLink"
+                      class="ml-3 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-all flex items-center space-x-2"
+                      :class="{ 'bg-green-600 hover:bg-green-700': inviteCopied }"
+                    >
+                      <FontAwesomeIcon :icon="faCopy" class="text-sm" />
+                      <span>{{ inviteCopied ? '복사됨!' : '복사' }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 유효기간 안내 -->
+                <div class="bg-accent-50 border border-accent-200 rounded-xl p-3">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-5 h-5 flex items-center justify-center">
+                      <svg class="w-4 h-4 text-accent-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-accent-800">
+                      이 링크는
+                      <span class="font-semibold">{{
+                        formatValidUntil(inviteLink.validUntil)
+                      }}</span
+                      >까지 유효해요.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
