@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+This project has Tailwind CSS v4 installed. Use Tailwind CSS classes instead of manual styling with class names and css when possible. When there are common styles to group, use `@apply`. For already existing files, convert existing styles to tailwind css only when necessary or asked explicitly by the user to do so.
+If your knowledge cutoff is behind Tailwind CSS v4 and not familiar with it, refer to the docs(https://tailwindcss.com/docs) first. v3 and v4 might differ quite a bit.

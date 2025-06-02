@@ -5,6 +5,7 @@ export interface GetPlanResDto {
   planId: number
   themeId: number
   ownerId: number
+  ownerNickname: string
   title: string
   description: string
   memo: string
@@ -109,7 +110,7 @@ export interface PlanNicknameResDto {
 
 export interface CreateInviteCodeResDto {
   inviteCode: string
-  validUntil: string
+  expiresAt: string
 }
 
 export interface GetInviteInfoResDto {

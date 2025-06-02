@@ -1,0 +1,125 @@
+---
+description: Explains color palettes for this web application project when designing.
+globs: 
+alwaysApply: false
+---
+# Trabuddy Color Palette
+
+## Primary Colors (Forest Green Base)
+- Primary: #2D5016 (Deep Forest Green)
+- Primary Light: #4A7C2E (Medium Forest Green) 
+- Primary Lighter: #6BA446 (Bright Forest Green)
+- Primary Dark: #1B3009 (Dark Forest Green)
+
+## Secondary Colors (Natural Complement)
+- Secondary: #8B4513 (Earthy Brown)
+- Secondary Light: #CD853F (Sandy Brown)
+- Secondary Dark: #654321 (Dark Brown)
+
+## Accent Colors
+- Accent: #FF8C42 (Warm Orange)
+- Success: #22C55E (Green)
+- Warning: #F59E0B (Amber)
+- Error: #EF4444 (Red)
+- Info: #3B82F6 (Blue)
+
+## Neutral Colors
+- Gray 50: #F9FAFB
+- Gray 100: #F3F4F6
+- Gray 200: #E5E7EB
+- Gray 300: #D1D5DB
+- Gray 400: #9CA3AF
+- Gray 500: #6B7280
+- Gray 600: #4B5563
+- Gray 700: #374151
+- Gray 800: #1F2937
+- Gray 900: #111827
+
+## Surface Colors
+- Background: #FFFFFF
+- Surface: #F8FAF6 (Very Light Green Tint)
+- Card: #FFFFFF
+- Border: #E2E8F0
+
+## Text Colors
+- Text Primary: #1F2937
+- Text Secondary: #6B7280
+- Text Muted: #9CA3AF
+- Text Inverse: #FFFFFF
+
+## Tailwind CSS Custom Colors Configuration
+When using with Tailwind CSS, add these to your tailwind.config.js:
+
+```js
+theme: {
+  extend: {
+    colors: {
+      primary: {
+        50: '#F0F9E8',
+        100: '#D9F0C4',
+        200: '#B8E19B',
+        300: '#94D071',
+        400: '#77BF4F',
+        500: '#6BA446', // Primary Lighter
+        600: '#4A7C2E', // Primary Light
+        700: '#2D5016', // Primary
+        800: '#1B3009', // Primary Dark
+        900: '#0F1805'
+      },
+      secondary: {
+        50: '#FAF7F2',
+        100: '#F2E8D8',
+        200: '#E6CFA8',
+        300: '#CD853F', // Secondary Light
+        400: '#B8713A',
+        500: '#8B4513', // Secondary
+        600: '#7A3C10',
+        700: '#654321', // Secondary Dark
+        800: '#4A2F18',
+        900: '#2F1E0F'
+      },
+      accent: {
+        50: '#FFF4ED',
+        100: '#FFE6D5',
+        200: '#FFCDAA',
+        300: '#FFAB74',
+        400: '#FF8C42', // Accent
+        500: '#F97316',
+        600: '#EA580C',
+        700: '#C2410C',
+        800: '#9A3412',
+        900: '#7C2D12'
+      }
+    }
+  }
+}
+```
+
+## PrimeVue Theme Customization
+For PrimeVue Aura theme customization:
+
+```js
+import { definePreset } from '@primeuix/themes'
+
+const TrabuddyPreset = definePreset(Aura, {
+  semantic: {
+    primary: {
+      50: '#F0F9E8',
+      100: '#D9F0C4',
+      // ... (same as Tailwind primary colors)
+      900: '#0F1805'
+    }
+  }
+})
+```
+```
+
+이 컬러 팔레트는:
+
+1. **포레스트 그린 기반**: 자연스럽고 신뢰감 있는 메인 컬러
+2. **접근성 고려**: WCAG 대비 기준을 충족하는 색상 조합
+3. **확장성**: 다양한 UI 상태와 컴포넌트에 적용 가능
+4. **일관성**: Tailwind CSS와 PrimeVue 테마에 모두 적용 가능
+5. **브랜드 정체성**: 여행 서비스에 적합한 자연친화적 이미지
+
+앞으로 이 컬러 팔레트를 규칙으로 사용하시면 됩니다!

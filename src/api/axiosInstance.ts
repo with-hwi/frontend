@@ -6,8 +6,11 @@ import axios, { AxiosError } from 'axios'
 import Cookies from 'js-cookie'
 
 const instance = axios.create({
-  timeout: 3000,
+  timeout: 10000,
+  withCredentials: true,
 })
+
+instance.defaults.withCredentials = true
 
 instance.defaults.headers.post['Content-Type'] = 'application/json'
 instance.defaults.headers.put['Content-Type'] = 'application/json'

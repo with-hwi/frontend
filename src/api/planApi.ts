@@ -19,6 +19,7 @@ import type {
   CreateInviteCodeResDto,
   GetInviteInfoResDto,
 } from '@/types/dto/plan'
+import type { AttractionItem } from '@/types/tour'
 
 const defaultParams = {}
 
@@ -69,7 +70,7 @@ const getParticipants = (planId: number) =>
   })
 
 const updateParticipant = (planId: number, userId: number, data: UpdateParticipantReqDto) =>
-  axios.patch<UpdateParticipantResDto>(
+  axios.put<UpdateParticipantResDto>(
     `${API_BASE_URL}/api/v1/plans/${planId}/participants/${userId}`,
     {
       ...data,
@@ -79,8 +80,8 @@ const updateParticipant = (planId: number, userId: number, data: UpdateParticipa
 const deleteParticipant = (planId: number, userId: number) =>
   axios.delete(`${API_BASE_URL}/api/v1/plans/${planId}/participants/${userId}`)
 
-const updateNickname = (planId: number, userId: number, data: PlanNicknameReqDto) =>
-  axios.put<PlanNicknameResDto>(`${API_BASE_URL}/api/v1/plans/${planId}/nickname/${userId}`, {
+const updateNickname = (planId: number, data: PlanNicknameReqDto) =>
+  axios.put<PlanNicknameResDto>(`${API_BASE_URL}/api/v1/plans/${planId}/nickname`, {
     ...data,
   })
 
@@ -94,10 +95,12 @@ const getInviteInfo = (inviteCode: string) =>
     },
   })
 
-const acceptInvite = (inviteCode: string) =>
-  axios.post(`${API_BASE_URL}/api/v1/plans/join`, {
+const acceptInvite = (inviteCode: string) => {
+  console.log(1111)
+  return axios.post(`${API_BASE_URL}/api/v1/plans/join`, {
     inviteCode,
   })
+}
 
 // TODO: 추후 별도 DTO 분리
 const getRecommendation = (planId: number) =>

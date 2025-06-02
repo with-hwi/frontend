@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { getInviteInfo, acceptInvite } from '@/services/planService'
 import type { InviteInfoItem } from '@/types/plan'
+import router from '@/router'
+import { useRouter } from 'vue-router'
 
 export const useInviteModalStore = defineStore('inviteModal', () => {
   // 상태
@@ -68,14 +70,20 @@ export const useInviteModalStore = defineStore('inviteModal', () => {
 
   // 초대 수락
   const acceptInvitation = async () => {
+    console.log(111111111111)
     if (!inviteCode.value) return
 
     isLoading.value = true
     error.value = null
 
     try {
-      await acceptInvite(inviteCode.value)
+      console.log(1)
+      const res = await acceptInvite(inviteCode.value)
+      console.log(2)
+      console.log(res)
+      // useRouter().push(`/plan/${res.data.planId}`)
       isSuccess.value = true
+      console.error(res)
     } catch (err) {
       console.error('초대 수락에 실패했습니다:', err)
       error.value = '초대 수락에 실패했습니다.'

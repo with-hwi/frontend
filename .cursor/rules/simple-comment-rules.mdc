@@ -1,0 +1,7 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+주석은 한국어로 작성해.
+사용자가 이해하기 어려워서 주석이 필요한 로직 앞에, 간결하게 작성해.

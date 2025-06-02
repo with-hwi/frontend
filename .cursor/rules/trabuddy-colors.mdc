@@ -1,0 +1,166 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Trabuddy Color Palette Guidelines
+
+## Overview
+
+Trabuddy uses a nature-inspired color palette consisting of Forest Green (primary), Warm Beige (secondary), and Coral Salmon (accent) colors. This palette creates a trustworthy, natural, and approachable brand experience perfect for travel planning services.
+
+## Primary Color - Forest Green
+
+**Use for**: Brand elements, navigation, main buttons, headers
+
+```css
+--color-primary-50: #f8f8f0; /* Very light cream beige - backgrounds */
+--color-primary-100: #f0f0e0; /* Light cream beige - card backgrounds */
+--color-primary-200: #e6e6cc; /* Light beige - borders, dividers */
+--color-primary-300: #d4d4a6; /* Medium beige - disabled states */
+--color-primary-400: #c0c080; /* Light forest green - secondary actions */
+--color-primary-500: #a8a868; /* Default forest green - main brand color */
+--color-primary-600: #9d9d60; /* Medium forest green - hover states */
+--color-primary-700: #7a7a40; /* Dark forest green - active states */
+--color-primary-800: #565620; /* Very dark forest green - text */
+--color-primary-900: #333300; /* Darkest forest green - headings */
+```
+
+**Tailwind classes**: `bg-primary-*`, `text-primary-*`, `border-primary-*`
+
+## Secondary Color - Warm Beige
+
+**Use for**: Backgrounds, cards, neutral elements, supporting content
+
+```css
+--color-secondary-50: #fdfcfa; /* Cream white - page backgrounds */
+--color-secondary-100: #faf6f0; /* Very light beige - section backgrounds */
+--color-secondary-200: #f4ebe0; /* Light beige - card backgrounds */
+--color-secondary-300: #ead5c1; /* Medium light beige - borders */
+--color-secondary-400: #ddc0a2; /* Medium beige - inactive elements */
+--color-secondary-500: #c9a882; /* Default beige - neutral elements */
+--color-secondary-600: #b8956f; /* Medium dark beige - secondary text */
+--color-secondary-700: #9d7c56; /* Dark beige - muted text */
+--color-secondary-800: #7a6147; /* Very dark beige - emphasis text */
+--color-secondary-900: #5a4735; /* Darkest beige - strong emphasis */;
+```
+
+**Tailwind classes**: `bg-secondary-*`, `text-secondary-*`, `border-secondary-*`
+
+## Accent Color - Coral Salmon
+
+**Use for**: CTAs, alerts, highlights, interactive elements that need attention
+
+```css
+--color-accent-50: #fef7f4; /* Very light peach - notification backgrounds */
+--color-accent-100: #feeee8; /* Light peach - alert backgrounds */
+--color-accent-200: #fddad0; /* Light coral - hover backgrounds */
+--color-accent-300: #fabaa8; /* Medium light coral - borders */
+--color-accent-400: #f69a80; /* Medium coral - secondary CTAs */
+--color-accent-500: #f07b5c; /* Default coral - primary CTAs */
+--color-accent-600: #e85d3d; /* Medium dark coral - hover CTAs */
+--color-accent-700: #d14426; /* Dark coral - active CTAs */
+--color-accent-800: #b73620; /* Very dark coral - error states */
+--color-accent-900: #962f1e; /* Darkest coral - critical alerts */
+```
+
+**Tailwind classes**: `bg-accent-*`, `text-accent-*`, `border-accent-*`
+
+## Usage Guidelines
+
+### Semantic Usage
+
+- **Success states**: Use `primary-500` to `primary-700`
+- **Warning states**: Use `accent-400` to `accent-600`
+- **Error states**: Use `accent-700` to `accent-900`
+- **Info states**: Use `secondary-600` to `secondary-800`
+
+### Text Contrast Requirements
+
+Always ensure WCAG AA compliance (4.5:1 contrast ratio):
+
+**On light backgrounds** (50-200):
+
+- Use `primary-800`, `primary-900` for headings
+- Use `secondary-700`, `secondary-800` for body text
+- Use `accent-700`, `accent-800` for links
+
+**On medium backgrounds** (300-600):
+
+- Use `primary-50`, `primary-100` for light text
+- Use `primary-900` for dark text
+- Test contrast before implementation
+
+**On dark backgrounds** (700-900):
+
+- Use `primary-50`, `primary-100` for text
+- Use `secondary-50`, `secondary-100` for secondary text
+- Use `accent-200`, `accent-300` for accent text
+
+### Component-Specific Guidelines
+
+#### Buttons
+
+- **Primary CTA**: `bg-primary-600 hover:bg-primary-700 text-white`
+- **Secondary**: `bg-secondary-100 hover:bg-secondary-200 text-primary-800`
+- **Accent CTA**: `bg-accent-500 hover:bg-accent-600 text-white`
+- **Danger**: `bg-accent-700 hover:bg-accent-800 text-white`
+
+#### Navigation
+
+- **Active state**: `bg-primary-50 text-primary-600`
+- **Hover state**: `hover:text-primary-600`
+- **Default**: `text-gray-700`
+
+#### Cards & Containers
+
+- **Card background**: `bg-white` or `bg-secondary-50`
+- **Card border**: `border-secondary-200`
+- **Section background**: `bg-secondary-50`
+
+#### Form Elements
+
+- **Input borders**: `border-secondary-300 focus:border-primary-500`
+- **Input backgrounds**: `bg-white focus:bg-primary-50`
+- **Labels**: `text-secondary-700`
+- **Placeholders**: `text-secondary-400`
+
+### Don'ts
+
+- ❌ Don't use accent colors for large background areas
+- ❌ Don't use primary-900 on primary-800 (insufficient contrast)
+- ❌ Don't use more than 3 different color families in one component
+- ❌ Don't use accent colors for neutral content
+- ❌ Don't override these colors without updating this guide
+
+### Brand Consistency
+
+- Always use these predefined colors instead of arbitrary hex values
+- When in doubt, prefer primary colors for brand elements
+- Use accent sparingly for maximum impact
+- Maintain the natural, trustworthy feeling of the palette
+
+## Examples
+
+### Hero Section
+
+```vue
+<section class="bg-gradient-to-br from-primary-50 to-primary-100">
+  <h1 class="text-4xl font-bold text-primary-900">
+    함께 만드는 <span class="text-primary-600">특별한 여행</span>
+  </h1>
+  <button class="bg-primary-600 hover:bg-primary-700 text-white">
+    여행지 찾기
+  </button>
+  <button class="bg-white text-primary-600 border-2 border-primary-600">
+    플랜 만들기
+  </button>
+</section>
+```
+
+### Alert Components
+
+```vue
+<!-- Success Alert -->
+<div class="bg-primary-50 border border-primary-200 text-primary-800"></div>
+```

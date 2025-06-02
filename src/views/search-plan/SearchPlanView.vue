@@ -21,6 +21,7 @@ import EditableLabel from '@/components/EditableLabel.vue'
 import PointList from '@/components/plan/PointList.vue'
 import MockProfileIcon from '@/components/plan/MockProfileIcon.vue'
 import PlanWizardModal from '@/components/plan/PlanWizardModal.vue'
+import AttractionImage from '@/components/AttractionImage.vue'
 import {
   ref,
   reactive,
@@ -69,6 +70,7 @@ import InputNumber from 'primevue/inputnumber'
 import DatePicker from 'primevue/datepicker'
 import Popover from 'primevue/popover'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { useUserStore } from '@/stores/userStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -326,7 +328,9 @@ const cachedPeople = ref<number>(1)
 
 // TODO: 사용자가 이 플랜의 주최자인지를 확인하는 로직 필요
 // 사용자 정보에서 userId를 받아올 수 있게 되면 추후 수정
-const tempUserId = ref(1)
+const userStore = useUserStore()
+const tempUser = userStore.userInfo
+const tempUserId = ref(tempUser?.userId)
 
 // 플랜 정보 섹션들의 접힘/펼침 상태
 const isPlanBasicInfoExpanded = ref(true)
@@ -763,7 +767,7 @@ const saveEditNickname = async () => {
   const userId = editingNickname.value
   const newNickname = editNicknameValue.value.trim()
 
-  const { nickname } = await updateNickname(planId.value, tempUserId.value, {
+  const { nickname } = await updateNickname(planId.value, {
     nickname: newNickname,
   })
 
@@ -1603,25 +1607,7 @@ onUnmounted(() => {
             <div class="flex items-center p-4">
               <!-- 이미지 영역 -->
               <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-secondary-100 mr-4">
-                <img
-                  v-if="item.firstImageUrl"
-                  :src="item.firstImageUrl"
-                  :alt="item.title"
-                  class="w-full h-full object-cover"
-                />
-                <div
-                  v-else
-                  class="w-full h-full flex items-center justify-center text-secondary-400"
-                >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
+                <AttractionImage :item="item" />
               </div>
 
               <!-- 정보 영역 -->

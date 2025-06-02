@@ -140,19 +140,15 @@ export const updatePoint = (
 
 export const deletePoint = (planId: number, pointId: number) => planApi.deletePoint(planId, pointId)
 
-export const updateNickname = (
-  planId: number,
-  userId: number,
-  { nickname }: { nickname: string },
-) =>
+export const updateNickname = (planId: number, { nickname }: { nickname: string }) =>
   planApi
-    .updateNickname(planId, userId, { nickname } as PlanNicknameReqDto)
+    .updateNickname(planId, { nickname } as PlanNicknameReqDto)
     .then((response) => response.data)
 
 export const createInviteCode = (planId: number) =>
   planApi.createInviteCode(planId).then<InviteCodeItem>((response) => ({
     inviteCode: response.data.inviteCode,
-    validUntil: deserializeDate(response.data.validUntil),
+    validUntil: deserializeDate(response.data.expiresAt),
   }))
 
 export const getInviteInfo = (inviteCode: string) =>

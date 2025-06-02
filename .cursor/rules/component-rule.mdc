@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This project has Tailwind CSS v4 installed. Use Tailwind CSS classes rather than manually styling with class names and css when possible. When there are common styles to group, use tailwind css's `@apply` functionality. For already existing files, convert existing styles to tailwind css only when necessary or asked explicitly by the user to do so.
+If your knowledge cutoff is behind Tailwind CSS v4 and not familiar with it, read docs('https://tailwindcss.com/') for instructions first.
+After each modification is complete, always check if the Tailwind CSS syntax you wrote is compatible with v4.
+
+This project also has PrimeVue v4 installed. Use PrimeVue components only when explicitly asked, e.g. when asked to use PrimeVue modal instead of manually implementing a modal. Use PrimeVue components only for components that have been requested by the user, otherwise make your own custom style following the brand design, color system and existing elements' designs.
+If your knowledge cutoff is behind PrimeVue v4 and not familiar with it, read docs('https://primevue.org/setup/') for instructions first.

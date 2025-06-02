@@ -616,3 +616,9 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
 }
+
+/* 전역 설정 */
+input,
+textarea {
+  outline: none;
+}

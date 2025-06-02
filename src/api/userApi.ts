@@ -22,15 +22,15 @@ const editUserProfile = (data: EditUserProfileDto) => {
 }
 
 const getMyPlans = () => {
-  return axios.get<MyPlanDto[]>(`${API_BASE_URL}/api/v1/users/my-page/plans`)
+  return axios.get<MyPlanDto[]>(`${API_BASE_URL}/api/v1/users/my-plans`)
 }
 
 const getMyJoins = () => {
-  return axios.get<MyJoinDto[]>(`${API_BASE_URL}/api/v1/users/my-page/plans`)
+  return axios.get<MyJoinDto[]>(`${API_BASE_URL}/api/v1/users/my-joins`)
 }
 
 const getMyLikes = () => {
-  return axios.get<MyLikeDto[]>(`${API_BASE_URL}/api/v1/users/my-page/plans`)
+  return axios.get<MyLikeDto[]>(`${API_BASE_URL}/api/v1/users/likes`)
 }
 
 export default {

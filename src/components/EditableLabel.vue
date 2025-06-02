@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps<{
   label?: string
   placeholder?: string
   mode?: 'input' | 'textarea'
   disabled?: boolean
+  variant?: 'default' | 'small'
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +16,23 @@ const emit = defineEmits<{
 const inputRef = ref<HTMLInputElement>()
 const editableLabel = ref(props.label || '')
 const isEditing = ref(false)
+
+// variant에 따른 스타일 계산
+const paddingClasses = computed(() => {
+  return props.variant === 'small' ? 'px-2 py-1' : 'px-3 py-2'
+})
+
+const iconSizeClasses = computed(() => {
+  return props.variant === 'small' ? 'w-3 h-3' : 'w-4 h-4'
+})
+
+const controlButtonSizes = computed(() => {
+  return props.variant === 'small' ? 'w-6 h-6' : 'w-8 h-8'
+})
+
+const controlIconSizes = computed(() => {
+  return props.variant === 'small' ? 'w-3 h-3' : 'w-4 h-4'
+})
 
 watch(
   () => props.label,
@@ -70,15 +88,18 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
     <div class="editable-label-input-container relative">
       <input
         v-if="mode === 'input'"
-        class="w-full px-3 py-2 text-primary-800 bg-transparent border-2 rounded-lg transition-all duration-200 focus:outline-none"
-        :class="{
-          'border-transparent hover:bg-secondary-50 hover:border-secondary-200 cursor-pointer':
-            !isEditing && !props.disabled,
-          'border-primary-300 bg-primary-50 focus:border-primary-500 focus:bg-white cursor-text':
-            isEditing,
-          'opacity-60 cursor-not-allowed': props.disabled,
-          'border-secondary-200 bg-secondary-50': !isEditing && props.disabled,
-        }"
+        :class="[
+          'w-full text-primary-800 bg-transparent border-2 rounded-lg transition-all duration-200 focus:outline-none',
+          paddingClasses,
+          {
+            'border-transparent hover:bg-secondary-50 hover:border-secondary-200 cursor-pointer':
+              !isEditing && !props.disabled,
+            'border-primary-300 bg-primary-50 focus:border-primary-500 focus:bg-white cursor-text':
+              isEditing,
+            'opacity-60 cursor-not-allowed': props.disabled,
+            'border-secondary-200 bg-secondary-50': !isEditing && props.disabled,
+          },
+        ]"
         type="text"
         ref="inputRef"
         @click="handleEditClick"
@@ -91,15 +112,18 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
       />
       <textarea
         v-else
-        class="w-full px-3 py-2 text-primary-800 bg-transparent border-2 rounded-lg transition-all duration-200 focus:outline-none resize-y min-h-[6rem]"
-        :class="{
-          'border-transparent hover:bg-secondary-50 hover:border-secondary-200 cursor-pointer':
-            !isEditing && !props.disabled,
-          'border-primary-300 bg-primary-50 focus:border-primary-500 focus:bg-white cursor-text':
-            isEditing,
-          'opacity-60 cursor-not-allowed': props.disabled,
-          'border-secondary-200 bg-secondary-50': !isEditing && props.disabled,
-        }"
+        :class="[
+          'w-full text-primary-800 bg-transparent border-2 rounded-lg transition-all duration-200 focus:outline-none resize-y min-h-[6rem]',
+          paddingClasses,
+          {
+            'border-transparent hover:bg-secondary-50 hover:border-secondary-200 cursor-pointer':
+              !isEditing && !props.disabled,
+            'border-primary-300 bg-primary-50 focus:border-primary-500 focus:bg-white cursor-text':
+              isEditing,
+            'opacity-60 cursor-not-allowed': props.disabled,
+            'border-secondary-200 bg-secondary-50': !isEditing && props.disabled,
+          },
+        ]"
         ref="inputRef"
         @click="handleEditClick"
         @keyup="handleTextareaKeyup"
@@ -118,11 +142,14 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
         <button
           @click="cancelEdit"
           @mousedown.prevent
-          class="flex items-center justify-center w-8 h-8 text-secondary-600 hover:text-accent-600 hover:bg-accent-50 rounded-md transition-all duration-150"
+          :class="[
+            'flex items-center justify-center text-secondary-600 hover:text-accent-600 hover:bg-accent-50 rounded-md transition-all duration-150',
+            controlButtonSizes,
+          ]"
           type="button"
           title="취소 (Esc)"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg :class="controlIconSizes" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -134,11 +161,14 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
         <button
           @click="saveEdit"
           @mousedown.prevent
-          class="flex items-center justify-center w-8 h-8 text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-150"
+          :class="[
+            'flex items-center justify-center text-secondary-600 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all duration-150',
+            controlButtonSizes,
+          ]"
           type="button"
           title="저장 (Enter)"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg :class="controlIconSizes" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -159,7 +189,7 @@ const handleTextareaKeyup = (e: KeyboardEvent) => {
         }"
       >
         <svg
-          class="w-4 h-4 text-secondary-400"
+          :class="[iconSizeClasses, 'text-secondary-400']"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

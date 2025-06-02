@@ -245,7 +245,7 @@ const displayNumberedMarkers = () => {
     positions.forEach((position) => {
       bounds.extend(position)
     })
-    kakaoMap.value.setBounds(bounds)
+    // kakaoMap.value.setBounds(bounds)
   }
 }
 

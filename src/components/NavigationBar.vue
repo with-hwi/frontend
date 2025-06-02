@@ -85,7 +85,7 @@ onUnmounted(() => {
     }"
     style="transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
   >
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex relative justify-between items-center nav-height">
         <!-- 서비스 로고 -->
         <div class="flex items-center">
@@ -156,10 +156,11 @@ onUnmounted(() => {
                 class="bg-white rounded-lg shadow-lg border border-secondary-200 overflow-hidden"
               >
                 <div class="py-1">
-                  <!-- 프로필 페이지로 이동 (아직 구현 안됨) -->
-                  <button
+                  <!-- 프로필 페이지로 이동 -->
+                  <RouterLink
+                    to="/my-page"
+                    @click="profilePopover.hide()"
                     class="w-full px-4 py-3 text-left text-sm text-secondary-700 hover:bg-secondary-50 transition-colors duration-200 flex items-center space-x-2"
-                    disabled
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -169,8 +170,8 @@ onUnmounted(() => {
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    <span class="text-secondary-400">프로필 (준비중)</span>
-                  </button>
+                    <span>마이페이지</span>
+                  </RouterLink>
 
                   <!-- 구분선 -->
                   <div class="border-t border-secondary-200 my-1"></div>

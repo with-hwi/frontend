@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Trabuddy
+
+프로젝트 이름: Trabuddy
+
+사용 기술 스택:
+- Vue 3 (Composition API)
+- Pinia (Composition Store)
+- TypeScript
+- Tailwind CSS v4
+- PrimeVue v4
